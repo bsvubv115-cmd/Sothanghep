@@ -1,0 +1,43 @@
+SỔ THẬN GHÉP – BẢN PHÁT HÀNH (PWA) – HƯỚNG DẪN ĐƯA LÊN MẠNG
+Phiên bản 1.0-thu-nghiem · 08/10/2026
+
+1. THƯ MỤC NÀY GỒM
+   index.html              Toàn bộ app (một file)
+   manifest.webmanifest    Thông tin để "Thêm vào màn hình chính"
+   sw.js                   Cho phép mở app khi không có mạng
+   icon-192.png, icon-512.png, icon-maskable-512.png, apple-touch-icon.png   Biểu tượng app
+
+   App KHÔNG có máy chủ dữ liệu, KHÔNG có cơ sở dữ liệu. Máy chủ web chỉ phát file app;
+   dữ liệu người bệnh chỉ nằm trên điện thoại của người bệnh và không bao giờ gửi lên máy chủ.
+
+2. YÊU CẦU DUY NHẤT: địa chỉ HTTPS
+   Chỉ cần đưa nguyên 8 file này vào một thư mục trên máy chủ web tĩnh có HTTPS.
+   (Không có HTTPS thì không cài lên màn hình chính và không chạy khi mất mạng.)
+
+3. CÁC CÁCH ĐƯA LÊN
+   A. Máy chủ của bệnh viện (khuyến nghị cho bản chính thức) – nhờ phòng CNTT:
+      - Chép 8 file vào một thư mục, ví dụ: https://<tên-miền-bệnh-viện>/sothanghep/
+      - Đặt header "Cache-Control: no-cache" cho index.html và sw.js để người bệnh luôn nhận bản mới.
+      - Không cần PHP, không cần cơ sở dữ liệu, không cần mở cổng gì thêm.
+   B. GitHub Pages (miễn phí, dùng cho chạy thử nội bộ):
+      - Tạo tài khoản tại github.com → New repository (chọn Public) → "uploading an existing file"
+        → kéo thả 8 file → Commit.
+      - Vào Settings → Pages → Branch: main → Save. Sau 1–2 phút có địa chỉ dạng
+        https://<tên-tài-khoản>.github.io/<tên-repository>/
+      - Lưu ý: mã nguồn app sẽ công khai (không có dữ liệu người bệnh nào trong đó).
+   C. Cloudflare Pages hoặc Netlify: tạo tài khoản, chọn "Upload / Deploy manually", kéo thả cả thư mục.
+
+4. SAU KHI CÓ ĐỊA CHỈ
+   - Địa chỉ chính:        https://.../          → sổ trống, người bệnh nhập hồ sơ lần đầu
+   - Chế độ dùng thử:      https://.../?demo=1   → 3 người bệnh mẫu, dùng để tập huấn nhân viên
+     (dữ liệu dùng thử và dữ liệu thật lưu tách riêng trên máy, không lẫn vào nhau)
+   - Gửi địa chỉ cho Vivian để tạo mã QR in lên tờ hướng dẫn người bệnh.
+
+5. CẬP NHẬT PHIÊN BẢN MỚI
+   Thay 8 file cũ bằng 8 file mới (giữ nguyên địa chỉ). Người bệnh mở app khi có mạng sẽ
+   tự nhận bản mới; dữ liệu trên máy không bị ảnh hưởng.
+
+6. NHỮNG GÌ CÒN PHẢI LÀM TRƯỚC KHI DÙNG CHO NGƯỜI BỆNH THẬT
+   - Hội đồng đạo đức chấp thuận; dược sĩ lâm sàng duyệt danh mục tương tác thuốc.
+   - (Đề xuất) Mã hoá dữ liệu trên máy bằng mã PIN.
+   - Chạy thử nội bộ theo "Bảng kiểm chạy thử nội bộ" và sửa lỗi.

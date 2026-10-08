@@ -1,0 +1,1865 @@
+<!doctype html><html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b6652"><meta name="description" content="Sổ theo dõi sau ghép thận – dữ liệu chỉ lưu trên điện thoại người bệnh">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Sổ Thận Ghép"><meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Theo dõi sau ghép thận</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Lexend:wght@500;600;700&display=swap">
+<style>
+/* Layout: một cột kiểu sổ khám (tối đa 760px), thanh điều hướng đáy cho điện thoại; chữ lớn cho người bệnh lớn tuổi */
+:root{
+  --bg:#f1f5f3; --surface:#ffffff; --surface-2:#e8efec; --ink:#12201b; --ink-2:#43524c; --muted:#62716b; --line:#d5dfdb;
+  --accent:#0b6652; --accent-2:#0d7a62; --accent-soft:#d5eae3; --on-accent:#ffffff;
+  --series:#2a78d6; --series-2:#eb6834; --band:rgba(11,102,82,.13); --hosp:rgba(179,38,30,.10);
+  --ok:#1b7743; --ok-soft:#dff1e5; --warn:#8a5600; --warn-soft:#fbedd0; --crit:#b3261e; --crit-soft:#fbe1dd; --info:#245a99; --info-soft:#e0eaf7;
+  --shadow:0 1px 2px rgba(18,32,27,.05),0 6px 18px rgba(18,32,27,.05);
+  --f-display:"Lexend","Be Vietnam Pro",system-ui,sans-serif;
+  --f-body:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1412; --surface:#141d1a; --surface-2:#1b2723; --ink:#e8f0ed; --ink-2:#b6c4be; --muted:#91a19a; --line:#283631;
+  --accent:#46c0a0; --accent-2:#5ccfb0; --accent-soft:#163a30; --on-accent:#04211a;
+  --series:#3987e5; --series-2:#d95926; --band:rgba(70,192,160,.15); --hosp:rgba(240,122,112,.14);
+  --ok:#5bcb8b; --ok-soft:#14321f; --warn:#e9b24f; --warn-soft:#3a2b0e; --crit:#f2796f; --crit-soft:#3e1916; --info:#82b2ee; --info-soft:#15273d;
+  --shadow:none; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1412; --surface:#141d1a; --surface-2:#1b2723; --ink:#e8f0ed; --ink-2:#b6c4be; --muted:#91a19a; --line:#283631;
+  --accent:#46c0a0; --accent-2:#5ccfb0; --accent-soft:#163a30; --on-accent:#04211a;
+  --series:#3987e5; --series-2:#d95926; --band:rgba(70,192,160,.15); --hosp:rgba(240,122,112,.14);
+  --ok:#5bcb8b; --ok-soft:#14321f; --warn:#e9b24f; --warn-soft:#3a2b0e; --crit:#f2796f; --crit-soft:#3e1916; --info:#82b2ee; --info-soft:#15273d;
+  --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--f-display);font-weight:600;line-height:1.25;margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:1.45rem} h2{font-size:1.1rem} h3{font-size:1rem}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.num,.tab-num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:760px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0}
+.brand svg{flex:none}
+.brand b{font-family:var(--f-display);font-weight:700;font-size:1.05rem;display:block;line-height:1.2}
+.brand span{font-size:.75rem;color:var(--muted);display:block}
+.pt-pick{flex:0 1 260px;min-width:0}
+.pt-pick select{width:100%;height:42px;border:1px solid var(--line);border-radius:10px;background:var(--surface-2);padding:0 10px;font-weight:600}
+.proto{background:var(--warn-soft);color:var(--warn);font-size:.8rem;font-weight:500}
+.proto div{max-width:760px;margin:0 auto;padding:6px 16px}
+
+main{max-width:760px;margin:0 auto;padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+.tab{display:flex;flex-direction:column;gap:16px}
+.page-h{display:flex;flex-direction:column;gap:4px}
+.page-h p{color:var(--ink-2)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);min-width:0}
+.card > h2{margin-bottom:10px}
+.card-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.muted{color:var(--muted)} .small{font-size:.85rem}
+.stack{display:flex;flex-direction:column;gap:10px}
+
+/* patient hero */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.day-badge{width:76px;height:76px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--f-display);line-height:1}
+.day-badge b{font-size:1.5rem;font-weight:700}
+.day-badge span{font-size:.62rem;margin-top:4px;text-transform:uppercase;letter-spacing:.06em}
+.hero h1{font-size:1.3rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:.78rem;padding:2px 9px;border-radius:999px;background:var(--surface-2);color:var(--ink-2);font-weight:500}
+
+/* pills (status) */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:.78rem;font-weight:600;white-space:nowrap}
+.pill svg{width:13px;height:13px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.crit{background:var(--crit-soft);color:var(--crit)} .pill.info{background:var(--info-soft);color:var(--info)}
+.pill.na{background:var(--surface-2);color:var(--muted)}
+
+/* alerts */
+.alert{display:grid;grid-template-columns:28px 1fr;gap:10px;padding:12px;border-radius:12px}
+.alert.crit{background:var(--crit-soft)} .alert.warn{background:var(--warn-soft)} .alert.info{background:var(--info-soft)}
+.alert .ai{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--surface)}
+.alert.crit .ai{background:var(--crit)} .alert.warn .ai{background:var(--warn)} .alert.info .ai{background:var(--info)}
+.alert .ai svg{width:16px;height:16px}
+.at{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.lvl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.alert.crit .lvl{color:var(--crit)} .alert.warn .lvl{color:var(--warn)} .alert.info .lvl{color:var(--info)}
+.ad{font-size:.75rem;color:var(--ink-2)}
+.am{font-weight:600;margin-top:2px}
+.aa{font-size:.9rem;color:var(--ink-2);margin-top:2px}
+.ok-note{display:flex;gap:10px;align-items:center;padding:12px;border-radius:12px;background:var(--ok-soft);color:var(--ok);font-weight:500}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:640px){.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.tile .tl{font-size:.78rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.tile .tv{font-family:var(--f-display);font-size:1.5rem;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.1}
+.tile .tv small{font-family:var(--f-body);font-size:.72rem;color:var(--muted);font-weight:500;margin-left:3px}
+.tile .ts{font-size:.78rem;color:var(--ink-2)}
+.tile svg.spark{width:100%;height:30px;display:block}
+
+/* appointment */
+.appt{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.cal{width:62px;border-radius:10px;overflow:hidden;text-align:center;border:1px solid var(--line);background:var(--surface)}
+.cal .m{background:var(--accent);color:var(--on-accent);font-size:.7rem;font-weight:700;padding:2px 0;text-transform:uppercase;letter-spacing:.05em}
+.cal .d{font-family:var(--f-display);font-size:1.6rem;font-weight:700;padding:2px 0 4px}
+.prep{margin:10px 0 0;padding-left:18px;color:var(--ink-2);font-size:.9rem}
+
+/* meds checklist */
+.dose-grp{display:flex;flex-direction:column;gap:6px}
+.dose-grp h3{font-size:.85rem;color:var(--muted);font-family:var(--f-body);font-weight:700;letter-spacing:.04em}
+.dose{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;min-height:52px}
+.dose input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.dose.done{background:var(--ok-soft);border-color:transparent}
+.dose .dn{font-weight:600}
+.dose .dd{font-size:.82rem;color:var(--ink-2)}
+.adh{display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;cursor:pointer;text-decoration:none}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.primary:hover{background:var(--accent-2)}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--accent)}
+.btn.danger{color:var(--crit)}
+.btn.sm{min-height:34px;padding:0 10px;font-size:.85rem;border-radius:8px}
+.btn[data-armed]{background:var(--crit);border-color:var(--crit);color:var(--surface)}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* forms */
+.form{display:flex;flex-direction:column;gap:16px}
+fieldset{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:12px;min-width:0}
+legend{font-family:var(--f-display);font-weight:600;font-size:1rem;margin-bottom:10px;padding:0}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.grid3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label,.flabel{font-size:.85rem;font-weight:600;color:var(--ink-2)}
+.field input,.field select,.field textarea{width:100%;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 12px;font-size:16px}
+.field textarea{min-height:70px;resize:vertical}
+.field input[readonly]{background:var(--surface-2);font-weight:700}
+.field small{font-size:.78rem;color:var(--muted)}
+.field .err{color:var(--crit);font-weight:600}
+.field.bad input{border-color:var(--crit)}
+.unit{display:flex;gap:6px}
+.unit input,.field .unit input{flex:1 1 auto;width:auto;min-width:0}
+.unit select,.field .unit select{flex:0 0 96px;width:96px;min-width:0;padding:8px 6px}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.ck{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:.92rem}
+.ck input{width:20px;height:20px;margin-top:1px;accent-color:var(--accent);flex:none}
+.ck:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+details.add{border:1px dashed var(--line);border-radius:12px;padding:0 14px}
+details.add[open]{padding-bottom:14px;border-style:solid}
+details.add summary{cursor:pointer;font-weight:600;color:var(--accent);padding:12px 0;list-style:none}
+details.add summary::-webkit-details-marker{display:none}
+details.add summary::before{content:"+ "}
+details.add[open] summary::before{content:"– "}
+
+/* segmented + range chips */
+.seg{display:flex;background:var(--surface-2);border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;border:0;background:transparent;min-height:40px;border-radius:9px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+.ranges{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.ranges button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:.85rem;font-weight:600;cursor:pointer;color:var(--ink-2)}
+.ranges button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem;color:var(--ink-2);align-items:center}
+.legend i{display:inline-block;vertical-align:middle;margin-right:5px}
+.lg-hosp{width:14px;height:12px;background:var(--hosp);border:1px solid var(--crit)}
+.lg-bx{width:0;height:14px;border-left:2px dashed var(--ink-2)}
+.lg-band{width:14px;height:12px;background:var(--band)}
+.lg-line{width:16px;height:0;border-top:2px solid}
+
+/* charts */
+.chart-card{padding:14px 14px 8px}
+.ch-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.ch-h h2{font-size:1rem}
+.ch-h .u{font-size:.78rem;color:var(--muted)}
+.ch-sub{font-size:.78rem;color:var(--muted);margin-bottom:4px}
+.chart{position:relative;width:100%;min-height:60px}
+.chart svg{display:block;overflow:visible;touch-action:pan-y}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .xt{stroke:var(--muted)}
+.chart text{font-family:var(--f-body);font-size:11px;fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart .endl{font-size:12px;font-weight:700;fill:var(--ink)}
+.chart .line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .area{opacity:.08}
+.chart .pt{stroke:var(--surface);stroke-width:2}
+.chart .band{fill:var(--band)}
+.chart .ref{stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 4}
+.chart .ref.crit{stroke:var(--crit)}
+.chart .rl{font-size:10.5px;font-weight:600}
+.chart .rl.crit{fill:var(--crit)}
+.chart .hosp{fill:var(--hosp)}
+.chart .bx{stroke:var(--ink-2);stroke-width:1.5;stroke-dasharray:3 3}
+.chart .evl{font-size:10px;font-weight:700;fill:var(--ink-2)}
+.chart .evl.h{fill:var(--crit)}
+.chart .cross{stroke:var(--ink-2);stroke-width:1}
+.chart .hit{fill:transparent;cursor:crosshair}
+.chart .hl{fill:var(--surface);stroke-width:2.5}
+.tip{position:absolute;top:0;z-index:5;pointer-events:none;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px;box-shadow:0 6px 20px rgba(0,0,0,.14);font-size:.8rem;min-width:150px;max-width:220px}
+.tip .tdate{color:var(--muted);font-size:.74rem;margin-bottom:4px}
+.tip .trow{display:flex;align-items:center;gap:6px}
+.tip .trow i{width:12px;height:0;border-top:2px solid;flex:none}
+.tip .trow b{font-variant-numeric:tabular-nums;font-size:.95rem}
+.tip .tst{margin-top:4px;font-weight:600}
+.tip .tst.warn{color:var(--warn)} .tip .tst.crit{color:var(--crit)}
+.empty-s{color:var(--muted);font-size:.9rem;padding:20px 0;text-align:center}
+
+/* timeline */
+.tl-month{font-family:var(--f-display);font-weight:600;font-size:.95rem;margin:6px 0 2px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tl-month span{font-family:var(--f-body);font-weight:500;font-size:.8rem;color:var(--muted)}
+.tl{list-style:none;margin:0;padding:0 0 0 18px;border-left:2px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.tl li{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.tl li::before{content:"";position:absolute;left:-25px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--surface);border:2px solid var(--muted)}
+.tl li.k-batthuong::before{border-color:var(--warn);background:var(--warn)}
+.tl li.k-event::before{border-color:var(--crit);background:var(--crit)}
+.tl li.k-biopsy::before{border-color:var(--ink);background:var(--ink)}
+.tl li.k-dinhky::before{border-color:var(--accent)}
+.tl .th{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.tl .th b{font-weight:600}
+.tl .tv{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.88rem;color:var(--ink-2);margin-top:4px;font-variant-numeric:tabular-nums}
+.tl .tv strong{color:var(--ink)}
+.tl .tn{font-size:.88rem;margin-top:4px;color:var(--ink-2)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.86rem;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+tr:last-child td{border-bottom:0}
+td.w{color:var(--warn);font-weight:700} td.c{color:var(--crit);font-weight:700}
+
+/* lists */
+.rows{display:flex;flex-direction:column}
+.row{display:flex;gap:12px;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.row:last-child{border-bottom:0}
+.row .rm{flex:1 1 220px;min-width:0}
+.row .rn{font-weight:600}
+.row .rd{font-size:.86rem;color:var(--ink-2)}
+.times{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.times span{font-size:.75rem;background:var(--surface-2);padding:1px 7px;border-radius:6px;font-variant-numeric:tabular-nums}
+dl.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin:0}
+@media (min-width:600px){dl.kv{grid-template-columns:repeat(3,minmax(0,1fr))}}
+dl.kv div{min-width:0}
+dl.kv dt{font-size:.75rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+dl.kv dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
+.hla{display:inline-flex;gap:4px}
+.hla span{font-size:.8rem;padding:1px 7px;border-radius:6px;background:var(--surface-2);font-variant-numeric:tabular-nums}
+.ix{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:4px}
+.ix .ixh{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.ix .ixn{font-weight:700}
+.ix p{font-size:.9rem;color:var(--ink-2)}
+.ix .apply{font-size:.82rem;color:var(--ink);font-weight:600}
+.quick{display:flex;flex-wrap:wrap;gap:6px}
+.quick button{border:1px solid var(--line);background:var(--surface-2);border-radius:999px;padding:4px 11px;font-size:.82rem;cursor:pointer}
+.proto-tbl td,.proto-tbl th{text-align:left}
+.proto-tbl tr.now td{background:var(--accent-soft);font-weight:700}
+.live{columns:2 200px;column-gap:16px;margin:0;padding-left:18px;font-size:.9rem;color:var(--ink-2)}
+.live li{break-inside:avoid;margin-bottom:4px}
+.refs{font-size:.8rem;color:var(--muted);padding-left:18px;margin:0}
+.refs li{margin-bottom:3px}
+
+/* tab bar */
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabbar-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(6,1fr)}
+.tabbar button{border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px 9px;font-size:.7rem;font-weight:600;color:var(--muted);cursor:pointer;min-height:58px}
+.tabbar svg{width:22px;height:22px}
+.tabbar button[aria-current="page"]{color:var(--accent)}
+.tabbar button.plus svg{background:var(--accent);color:var(--on-accent);border-radius:8px;padding:2px;width:26px;height:26px}
+#toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.9rem;z-index:40;max-width:calc(100% - 32px)}
+
+/* v2: liên hệ BS, thẻ thuốc, sheet, khoá PIN, BAASIS */
+.contact{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:var(--surface-2)}
+.contact.strong{background:var(--crit-soft)}
+.contact .phone{font-family:var(--f-display);font-size:1.3rem;font-weight:600;user-select:all;font-variant-numeric:tabular-nums}
+.wallet{border:2px solid var(--crit);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;background:var(--surface)}
+.wallet .w-top{font-family:var(--f-display);font-weight:700;color:var(--crit);font-size:1.1rem;letter-spacing:.03em}
+.wallet .w-sub{font-size:.9rem;color:var(--ink-2)}
+.wallet .w-h{font-weight:700;margin-top:4px}
+.wallet ul{margin:0;padding-left:18px;font-size:.92rem;display:flex;flex-direction:column;gap:2px}
+.wallet .w-ok{background:var(--ok-soft);color:var(--ok);font-weight:600;padding:6px 10px;border-radius:8px;margin-top:4px}
+.wallet .w-dr{font-size:.9rem;color:var(--ink-2)}
+.sheet .wallet{font-size:1.08rem}.sheet .wallet ul{font-size:1.04rem}.sheet .wallet .w-top{font-size:1.35rem}
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+@media (min-width:600px){.sheet{align-items:center}}
+.sheet-in{background:var(--surface);color:var(--ink);border-radius:16px;padding:18px;max-width:560px;width:100%;max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.sheet-in ul{margin:0;padding-left:18px}
+.lock{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
+.lock-in{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;max-width:320px;width:100%}
+.lock-in input{width:190px;text-align:center;font-size:1.6rem;letter-spacing:.5em;min-height:56px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+.lock .err{color:var(--crit);font-weight:600}
+.forgot{font-size:.9rem}
+.forgot summary{cursor:pointer;color:var(--accent);font-weight:600;margin-bottom:6px}
+.bq{gap:6px}
+.bq legend{font-family:var(--f-body);font-size:.95rem;font-weight:600;margin-bottom:6px}
+.yn{display:flex;gap:8px}
+.yn label{flex:1;display:flex;gap:8px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;min-height:44px;cursor:pointer;font-weight:600}
+.yn input{accent-color:var(--accent);width:18px;height:18px}
+.yn label:has(input:checked){background:var(--accent-soft);border-color:var(--accent)}
+.inp{min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--surface);padding:8px 12px;font-size:16px;width:100%;color:var(--ink)}
+.sum-kpi{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.92rem}
+.sum-kpi b{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:no-preference){.tab{animation:fade .18s ease-out}@keyframes fade{from{opacity:.4}to{opacity:1}}}
+</style>
+</head><body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"/></svg>
+      <div><b>Sổ Thận Ghép</b><span>Theo dõi sau ghép thận</span></div>
+    </div>
+    <div class="pt-pick"><label class="sr" for="pt-select">Chọn người bệnh</label><select id="pt-select"></select></div>
+  </div>
+  <div class="proto"><div>Bản mẫu · Dữ liệu giả · Ngưỡng cảnh báo tạm thời, chờ bác sĩ duyệt. Dữ liệu chỉ lưu trên trình duyệt của máy này.</div></div>
+</header>
+
+<main id="main">
+  <section id="tab-home" class="tab" aria-label="Tổng quan"></section>
+  <section id="tab-entry" class="tab" aria-label="Nhập kết quả" hidden></section>
+  <section id="tab-charts" class="tab" aria-label="Diễn tiến" hidden></section>
+  <section id="tab-meds" class="tab" aria-label="Thuốc" hidden></section>
+  <section id="tab-sched" class="tab" aria-label="Lịch" hidden></section>
+  <section id="tab-profile" class="tab" aria-label="Hồ sơ" hidden></section>
+</main>
+
+<nav class="tabbar" aria-label="Điều hướng chính">
+  <div class="tabbar-in">
+    <button type="button" data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Tổng quan</button>
+    <button type="button" data-tab="entry" class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>Nhập</button>
+    <button type="button" data-tab="charts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Diễn tiến</button>
+    <button type="button" data-tab="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.6 8.6l4.8 6.8"/></svg>Thuốc</button>
+    <button type="button" data-tab="sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch</button>
+    <button type="button" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>Hồ sơ</button>
+  </div>
+</nav>
+<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Chi tiết"><div class="sheet-in"><div id="sheet-c"></div><div class="actions"><button class="btn" type="button" data-close>Đóng</button></div></div></div>
+<div id="lock" class="lock" hidden><form id="lock-f" class="lock-in" novalidate>
+  <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"/></svg>
+  <h1>Sổ Thận Ghép</h1><p class="muted">Nhập mã PIN 4 số để mở sổ</p>
+  <label class="sr" for="lock-in">Mã PIN</label><input id="lock-in" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password">
+  <p id="lock-err" class="err" hidden>Mã PIN chưa đúng. Thử lại.</p>
+  <button class="btn primary" type="submit" style="min-width:190px">Mở sổ</button>
+  <details class="forgot"><summary>Quên mã PIN?</summary><p class="small" style="margin-bottom:8px">Dữ liệu chỉ nằm trên máy này nên không thể lấy lại mã. Cách duy nhất là xoá dữ liệu rồi khôi phục từ file sao lưu.</p><button class="btn danger" type="button" id="lock-wipe">Xoá dữ liệu trên máy này</button></details>
+</form></div>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<script>const BUILD = "pwa";</script><script>
+'use strict';
+/* ================= Tiện ích ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad2 = n => String(n).padStart(2, '0');
+const pd = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+const iso = d => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const addDays = (s, n) => { const d = pd(s); d.setDate(d.getDate() + n); return iso(d); };
+const diffDays = (a, b) => Math.round((pd(b) - pd(a)) / 864e5);
+const fmtD = s => { if (!s) return '—'; const d = pd(s); return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}/${d.getFullYear()}`; };
+const fmtDs = s => { const d = pd(s); return `${pad2(d.getDate())}/${pad2(d.getMonth() + 1)}`; };
+const WD = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+const fmtN = (v, d = 0) => v == null || !isFinite(v) ? '—' : Number(v).toLocaleString('vi-VN', { minimumFractionDigits: d, maximumFractionDigits: d });
+const uid = () => Math.random().toString(36).slice(2, 10);
+const TODAY = iso(new Date());
+const ageAt = (dob, date) => { const a = pd(dob), b = pd(date); let y = b.getFullYear() - a.getFullYear(); if (b.getMonth() < a.getMonth() || (b.getMonth() === a.getMonth() && b.getDate() < a.getDate())) y--; return y; };
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').trim();
+const hm = t => { if (!t) return null; const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+
+/* eGFR CKD-EPI 2021 (creatinin, không hệ số chủng tộc) */
+function egfr(crUmol, sex, age) {
+  if (!crUmol || !age) return null;
+  const scr = crUmol / 88.4, F = sex === 'F', k = F ? 0.7 : 0.9, a = F ? -0.241 : -0.302;
+  let e = 142 * Math.pow(Math.min(scr / k, 1), a) * Math.pow(Math.max(scr / k, 1), -1.2) * Math.pow(0.9938, age);
+  if (F) e *= 1.012;
+  return Math.round(e);
+}
+const egfrOf = (p, e) => e.cr ? egfr(e.cr, p.sex, ageAt(p.dob, e.date)) : null;
+
+/* Khung nồng độ đáy tacrolimus (tạm, chờ BS duyệt) */
+/* Khung mặc định của khoa (BS chỉnh trong Hồ sơ). Khung BS ghi ở từng lần tái khám luôn được ưu tiên. */
+/* Khung đích theo thời gian sau ghép và phác đồ duy trì — theo bài "Theo dõi TDM của thuốc UCMD trong thực hành"
+   (BS.CKII Lê Thị Hồng Vũ, BV Nhân dân 115; tổng hợp KDIGO 2009, Brunet 2019, Meziyerh 2023, TRANSFORM). null = theo phác đồ khoa. */
+const PERIODS = [30, 90, 182, 365, 99999];
+const PERIOD_LB = ['Tháng 1', 'Tháng 2–3', 'Tháng 4–6', 'Tháng 7–12', '> 12 tháng'];
+const REGIMENS = { tac_mpa: 'Tacrolimus + MPA + Methylprednisolon', tac_evr: 'Tacrolimus giảm liều + Everolimus + Methylprednisolon' };
+const DEF_TBL = { tac_mpa: [[8, 12], [6, 10], [5, 8], [5, 8], [5, 7]], tac_evr: [null, [2, 5], [2, 5], [2, 5], [2, 5]], evr: [[5, 10], [3, 8]] };
+/* Everolimus tính theo thời gian kể từ khi bắt đầu everolimus (ngày bắt đầu phác đồ), không theo ngày ghép */
+const EVR_DAYS = 182, EVR_LB = ['6 tháng đầu dùng everolimus', 'Sau 6 tháng'];
+/* Chuyển bảng khung đích cũ 4 giai đoạn (0–1, 1–3, 3–12, > 12 tháng) sang 5 giai đoạn (tách tháng 4–6 và 7–12) */
+function normTbl(x) {
+  if (!x.tbl) { x.tbl = JSON.parse(JSON.stringify(DEF_TBL)); return; }
+  Object.keys(DEF_TBL).forEach(k => {
+    let t = x.tbl[k]; if (!Array.isArray(t)) { x.tbl[k] = JSON.parse(JSON.stringify(DEF_TBL[k])); return; }
+    if (k === 'evr') {
+      if (t.length !== 2) { const same = (a, c) => a && +a[0] === +c[0] && +a[1] === +c[1]; const old = t.every(r => !r || same(r, [3, 8]) || same(r, [5, 10])); x.tbl.evr = old ? JSON.parse(JSON.stringify(DEF_TBL.evr)) : [t[1] || [5, 10], t[t.length - 1] || [3, 8]]; }
+      return;
+    }
+    if (t.length === 4) {
+      const same = (a, b) => (!a && !b) || (a && b && +a[0] === +b[0] && +a[1] === +b[1]);
+      if (k === 'evr' && t.every(r => !r || same(r, [3, 8]))) t = JSON.parse(JSON.stringify(DEF_TBL.evr));
+      else { t = [t[0], t[1], t[2], t[2], t[3]]; if (k === 'tac_mpa' && same(t[4], [5, 8])) t[4] = [5, 7]; }
+      x.tbl[k] = t;
+    }
+  });
+}
+const TGT_SRC = 'Bài "Theo dõi TDM của thuốc UCMD trong thực hành" – BS.CKII Lê Thị Hồng Vũ (tổng hợp KDIGO 2009; Brunet 2019; Meziyerh 2023; TRANSFORM)';
+const usesEvr = p => p.regimen === 'tac_evr';
+const usesSrl = () => false;
+const usesTac = p => p.regimen !== 'srl_free';
+function regOn(p, date, strict) { const r = p.regimen || 'tac_mpa'; if (r === 'tac_mpa') return r; return (!p.regimenFrom || (strict ? date > p.regimenFrom : date >= p.regimenFrom)) ? r : 'tac_mpa'; }
+/* Bảng khung đích áp dụng cho từng thuốc theo phác đồ đang dùng tại thời điểm đó */
+function tblKey(rg, kind) {
+  if (kind === 'tac') return rg === 'srl_free' ? null : rg;
+  if (kind === 'evr') return rg === 'tac_evr' ? 'evr' : null;
+  if (kind === 'srl') return rg === 'tac_srl' ? 'srl' : rg === 'srl_free' ? 'srl_free' : null;
+  return null;
+}
+function tblFor(p, key) { return (p.tbl && p.tbl[key]) || DEF_TBL[key]; }
+const TGK = { tac: ['tgLo', 'tgHi'], evr: ['egLo', 'egHi'], srl: ['sgLo', 'sgHi'] };
+const DOSEK = { tac: ['tdAM', 'tdPM'], evr: ['edAM', 'edPM'], srl: ['sdAM', 'sdPM'] };
+const DRUG = { tac: 'Tacrolimus', evr: 'Everolimus', srl: 'Sirolimus' };
+const has = v => v != null && v !== '';
+function tgtCalc(p, list, date, kind, strict) {
+  const [lk, hk] = TGK[kind];
+  for (let i = list.length - 1; i >= 0; i--) { const x = list[i]; if (has(x[lk]) && has(x[hk])) return [+x[lk], +x[hk]]; }
+  const key = tblKey(regOn(p, date, strict), kind); if (!key) return null;
+  let i;
+  if (key === 'evr') i = diffDays(p.regimenFrom || p.txDate, date) <= EVR_DAYS ? 0 : 1;
+  else { const day = diffDays(p.txDate, date); i = PERIODS.findIndex(x => day <= x); if (i < 0) i = PERIODS.length - 1; }
+  const r = tblFor(p, key)[i];
+  return r && has(r[0]) && has(r[1]) ? [+r[0], +r[1]] : null;
+}
+/* Đánh giá nồng độ của một lần ghi: dùng khung đã có TRƯỚC lần ghi đó (khung BS ghi hôm nay áp dụng từ hôm nay trở đi) */
+function tgtForEntry(p, e, kind) { const i = p.entries.indexOf(e); return tgtCalc(p, i < 0 ? p.entries.filter(x => x.date < e.date) : p.entries.slice(0, i), e.date, kind, true); }
+function tgtOnDate(p, date, kind) { return tgtCalc(p, p.entries.filter(x => x.date <= date), date, kind); }
+const dTot = (a, b) => (!has(a) && !has(b)) ? null : (+a || 0) + (+b || 0);
+const mg = v => String(+v).replace('.', ',');
+/* ===== Creatinin: 3 lớp =====
+   1) Mốc cố định: Cr lúc xuất viện; sau 12 tháng Cr 1 năm (nếu có); BS có thể đặt lại tại một lần khám (áp dụng từ lần khám đó, kể cả lần đó).
+   2) Nền động: trung vị 3 kết quả "ổn định" (không bị cảnh báo creatinin) gần nhất trong 12 tháng, tính từ mốc; chưa đủ 3 kết quả thì dùng mốc.
+   3) So lần trước: tăng >= 20% so với kết quả liền trước (trong 90 ngày).
+   Trước ngày xuất viện: không so sánh. */
+function crFixed(p, date) { const d = date || TODAY; if (has(p.disDate) && d < p.disDate) return null; if (has(p.cr1y) && diffDays(p.txDate, d) > 365) return { v: +p.cr1y, lbl: '1 năm sau ghép' }; if (has(p.crAdj) && (!p.crAdjDate || d >= p.crAdjDate)) return { v: +p.crAdj, lbl: 'hiệu chỉnh (DGF)', from: p.crAdjDate }; if (has(p.crDis)) return { v: +p.crDis, lbl: 'lúc xuất viện' }; return has(p.baseCr) ? { v: +p.baseCr, lbl: 'lúc xuất viện' } : null; }
+function crAnchor(p, date, upto) {
+  const d = date || TODAY, fx = crFixed(p, d); if (!fx) return null;
+  let ov = null; for (const x of p.entries) { if (upto && x === upto) { if (has(x.crBase)) ov = x; break; } if (x.date > d) break; if (has(x.crBase)) ov = x; }
+  if (ov) return { v: +ov.crBase, lbl: 'BS đặt ngày ' + fmtD(ov.date), from: ov.date };
+  return { v: fx.v, lbl: fx.lbl, from: fx.from || p.disDate || p.txDate };
+}
+const median = a => { const b = a.slice().sort((x, y) => x - y), n = b.length; return n % 2 ? b[(n - 1) / 2] : (b[n / 2 - 1] + b[n / 2]) / 2; };
+const _crCache = new WeakMap();
+function crTrack(p) {
+  const sig = p.entries.map(x => x.date + ':' + (x.cr ?? '') + ':' + (x.crBase ?? '')).join('|') + '#' + [p.disDate, p.crDis, p.cr1y, p.baseCr, p.txDate, p.crAdj, p.crAdjDate].join(',');
+  const c = _crCache.get(p); if (c && c.sig === sig) return c.m;
+  const m = new Map(), stable = []; let prev = null;
+  for (const e of p.entries) {
+    if (!has(e.cr)) continue;
+    const an = crAnchor(p, e.date, e); let o = { base: null, lbl: '', r: null, prev: null, rp: null, stable: false };
+    if (an) {
+      const pool = stable.filter(x => x.date >= an.from && x.date < e.date && diffDays(x.date, e.date) <= 365).slice(-3);
+      const dyn = pool.length >= 3;
+      o.base = dyn ? Math.round(median(pool.map(x => x.cr))) : an.v;
+      o.lbl = dyn ? 'trung vị 3 lần ổn định gần nhất' : an.lbl;
+      o.r = (e.cr - o.base) / o.base;
+      if (prev && prev.date < e.date && diffDays(prev.date, e.date) <= 90 && (!has(p.disDate) || prev.date >= p.disDate)) { o.prev = prev; o.rp = (e.cr - prev.cr) / prev.cr; }
+      o.stable = o.r < 0.15 && !(o.rp != null && o.rp >= 0.20);
+      if (o.stable) stable.push(e);
+    }
+    m.set(e, o); prev = e;
+  }
+  _crCache.set(p, { sig, m }); return m;
+}
+const crOf = (p, e) => crTrack(p).get(e) || null;
+/* Nền hiện tại (cho ô tổng quan, đồ thị): nền sẽ dùng nếu hôm nay có kết quả mới */
+function crBaseNow(p, date) {
+  const d = date || TODAY, an = crAnchor(p, d); if (!an) return null;
+  const m = crTrack(p), pool = p.entries.filter(x => has(x.cr) && x.date <= d && x.date >= an.from && diffDays(x.date, d) <= 365 && (m.get(x) || {}).stable).slice(-3);
+  return pool.length >= 3 ? { v: Math.round(median(pool.map(x => x.cr))), lbl: 'trung vị 3 lần ổn định gần nhất' } : { v: an.v, lbl: an.lbl };
+}
+function baseCrOf(p, date) { const b = crBaseNow(p, date); return b ? b.v : null; }
+function baseLbl(p, date) { const b = crBaseNow(p, date); return b ? b.lbl : 'lúc xuất viện'; }
+/* Lớp 3 – suy giảm mạn (chỉ hiện cho BS): nền động so với mốc cố định; độ dốc eGFR 12 tháng */
+function crChronic(p) {
+  const fx = crFixed(p, TODAY), now = crBaseNow(p, TODAY), m = crTrack(p);
+  const vsFixed = fx && now ? (now.v - fx.v) / fx.v : null;
+  const last = p.entries.filter(x => has(x.cr)).slice(-1)[0], to = last ? last.date : TODAY;
+  const pts = p.entries.filter(x => has(x.cr) && (m.get(x) || {}).stable && diffDays(x.date, to) <= 365).map(x => [diffDays(p.txDate, x.date) / 365.25, egfrOf(p, x)]).filter(q => q[1] != null);
+  let slope = null;
+  if (pts.length >= 3 && (pts[pts.length - 1][0] - pts[0][0]) * 365.25 >= 180) { const n = pts.length, mx = pts.reduce((a, q) => a + q[0], 0) / n, my = pts.reduce((a, q) => a + q[1], 0) / n; const sxy = pts.reduce((a, q) => a + (q[0] - mx) * (q[1] - my), 0), sxx = pts.reduce((a, q) => a + (q[0] - mx) ** 2, 0); slope = sxx ? sxy / sxx : null; }
+  return { fixed: fx, now, vsFixed, slope, n: pts.length };
+}
+/* Đọc khung đích ghi gọn dạng "6-8", "5–7", "6 đến 8" */
+function parseRange(str, min = 0.5, max = 40) {
+  const t = String(str || '').trim(); if (!t) return null;
+  const m = t.replace(/,/g, '.').match(/^(\d+(?:\.\d+)?)\s*(?:-|–|—|đến|den|to)\s*(\d+(?:\.\d+)?)$/i);
+  if (!m) return 'err'; const a = +m[1], b = +m[2];
+  return a >= min && b <= max && b > a ? [a, b] : 'err';
+}
+const rangeVal = t => t ? `${mg(t[0])}-${mg(t[1])}` : '';
+const tgtTxt = t => t ? t.map(mg).join('–') : 'theo phác đồ khoa';
+/* Biến thiên nội cá thể (IPV, CV%) và thời gian trong khung đích (TTR, nội suy tuyến tính Rosendaal) của tacrolimus */
+function tacIPV(p, from, to) {
+  const v = p.entries.filter(e => e.date >= from && e.date <= to && has(e.tac) && e.kind !== 'batthuong').map(e => +e.tac);
+  if (v.length < 3) return { n: v.length, cv: null };
+  const m = v.reduce((a, b) => a + b, 0) / v.length, sd = Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / (v.length - 1));
+  return { n: v.length, cv: sd / m * 100, mean: m };
+}
+function tacTTR(p, from, to) {
+  const E = p.entries.filter(e => e.date >= from && e.date <= to && has(e.tac));
+  let tot = 0, inn = 0;
+  for (let i = 1; i < E.length; i++) {
+    const a = E[i - 1], b = E[i], n = diffDays(a.date, b.date);
+    for (let k = 0; k < n; k++) { const d = addDays(a.date, k), v = +a.tac + (b.tac - a.tac) * k / n, t = tgtOnDate(p, d, 'tac'); if (!t) continue; tot++; if (v >= t[0] && v <= t[1]) inn++; }
+  }
+  return { n: E.length, days: tot, ttr: tot ? inn / tot * 100 : null };
+}
+function fmtDose(a, b) { return has(b) && +b > 0 ? `${mg(a || 0)} mg sáng + ${mg(b)} mg tối` : `${mg(a || 0)} mg/ngày`; }
+function prevWith(p, e, keys) { let r = null; for (const x of p.entries) { if (x === e) break; if (x.date > e.date) break; if (keys.some(k => has(x[k]))) r = x; } return r; }
+/* Tỉ số nồng độ/liều (C/D): nồng độ hôm nay chia cho liều đang uống trước lần lấy máu */
+function cdRatio(p, e, kind) {
+  const lv = kind === 'tac' ? e.tac : e.evr; if (!has(lv)) return null;
+  const [a, b] = DOSEK[kind], pv = prevWith(p, e, [a, b]) || (has(e[a]) ? e : null); if (!pv) return null;
+  const d = dTot(pv[a], pv[b]); return d ? lv / d : null;
+}
+
+/* ================= Danh mục ================= */
+const KIND = { dinhky: 'Tái khám định kỳ', batthuong: 'Khi có bất thường', tainha: 'Tự đo tại nhà' };
+const SYM = [
+  ['sot', 'Sốt ≥ 38°C', 'crit', 'Sốt ở người đang dùng thuốc ức chế miễn dịch có thể là nhiễm trùng nặng. Có thể uống thuốc hạ sốt (paracetamol). Liên hệ BS ngay để được điều trị; không tự dùng kháng sinh hay thuốc giảm đau nhóm NSAID.'],
+  ['tieuit', 'Tiểu ít, nước tiểu giảm rõ', 'crit', 'Có thể do thải ghép, mất nước hoặc tắc nghẽn đường tiểu. Liên hệ BS ngay.'],
+  ['dauvungghep', 'Đau hoặc căng tức vùng thận ghép', 'crit', 'Có thể do thải ghép hoặc nhiễm trùng thận ghép. Liên hệ BS ngay.'],
+  ['khotho', 'Khó thở', 'crit', 'Đến cơ sở cấp cứu gần nhất để được xử trí kịp thời.'],
+  ['non', 'Nôn, không uống được thuốc', 'crit', 'Không uống được thuốc chống thải ghép cần xử trí trong ngày. Liên hệ BS để được hướng dẫn uống liều bổ sung.'],
+  ['tieuchay', 'Tiêu chảy', 'warn', 'Tiêu chảy làm tăng nồng độ tacrolimus và gây mất nước. Uống đủ nước, báo BS để kiểm tra FK và creatinin.'],
+  ['phu', 'Phù chân hoặc mặt', 'warn', 'Có thể do giữ nước hoặc đạm niệu tăng. Cân nặng hằng ngày và báo BS.'],
+  ['tieumau', 'Tiểu máu, tiểu buốt', 'warn', 'Có thể do nhiễm trùng tiểu. Báo BS để xét nghiệm nước tiểu và điều trị.'],
+  ['run', 'Run tay nhiều, tê bì', 'warn', 'Có thể do nồng độ tacrolimus cao. Báo BS để kiểm tra FK.'],
+  ['quenthuoc', 'Quên hoặc bỏ liều thuốc chống thải ghép', 'warn', 'Bỏ liều làm giảm nồng độ thuốc, tăng nguy cơ thải ghép. Không uống gấp đôi liều; hỏi BS cách xử trí.']
+];
+const CORE_SYM = ['sot', 'tieuit', 'dauvungghep', 'tieuchay', 'quenthuoc'];
+const EVT = { thaighep: 'Thải ghép', nhiemtrung: 'Nhiễm trùng', timmach: 'Biến cố tim mạch', dtd: 'Đái tháo đường sau ghép', ungthu: 'Ung thư', ngoaikhoa: 'Biến chứng ngoại khoa', khac: 'Biến cố khác' };
+const BANFF = {
+  binhthuong: 'Không thải ghép / bình thường', borderline: 'Nghi ngờ (borderline) TCMR', tcmr: 'Thải ghép qua trung gian tế bào T (TCMR)',
+  amr: 'Thải ghép qua trung gian kháng thể (AMR) hoạt động', camr: 'AMR mạn tính hoạt động', ifta: 'Xơ hoá mô kẽ – teo ống thận (IFTA)',
+  bk: 'Bệnh thận do virus BK', cni: 'Độc thận do thuốc CNI', taiphat: 'Tái phát bệnh cầu thận', khac: 'Khác'
+};
+const MEDCLS = { tac: 'Tacrolimus', csa: 'Cyclosporin', mmf: 'Mycophenolat (MPA)', aza: 'Azathioprin', mtor: 'Ức chế mTOR (everolimus)', pred: 'Corticoid (methylprednisolon, prednisolon)', '': 'Thuốc khác' };
+const PROTO = [
+  { a: 0, b: 30, t: 'Tháng 1', f: 'Mỗi tuần' },
+  { a: 31, b: 60, t: 'Tháng 2', f: 'Mỗi 2 tuần' },
+  { a: 61, b: 1e9, t: 'Từ tháng 3', f: 'Mỗi tháng, và khám ngay khi có bất thường' }
+];
+/* Lịch tái khám của khoa: tháng 1 mỗi tuần, tháng 2 mỗi 2 tuần, từ tháng 3 mỗi tháng */
+function visitOffsets(maxDay) { const o = [7, 14, 21, 28, 42, 56]; for (let d = 90; d <= maxDay; d += 30) o.push(d); return o.filter(d => d <= maxDay); }
+/* Mốc tạo dữ liệu mẫu (giữ nguyên để dữ liệu giả không đổi) */
+function seedOffsets(maxDay) {
+  const o = [10, 14, 17, 21, 24, 28];
+  for (let d = 35; d <= 91; d += 7) o.push(d);
+  for (let d = 105; d <= 182; d += 14) o.push(d);
+  for (let d = 210; d <= 365; d += 30) o.push(d);
+  for (let d = 455; d <= maxDay; d += 90) o.push(d);
+  return o.filter(d => d <= maxDay);
+}
+
+const VAX = [
+  { k: 'cum', name: 'Cúm (bất hoạt)', sched: 'Mỗi năm 1 liều; có thể tiêm từ tháng thứ 1 sau ghép', minDay: 30, repeat: 365 },
+  { k: 'pcv', name: 'Phế cầu (PCV20, hoặc PCV15 → PPSV23)', sched: '1 liều PCV20; hoặc PCV15 rồi PPSV23 sau ≥ 8 tuần', minDay: 90, doses: 1 },
+  { k: 'hbv', name: 'Viêm gan B', sched: 'Theo dõi anti-HBs; tiêm nhắc khi < 10 mIU/mL', minDay: 90, hbv: true },
+  { k: 'rzv', name: 'Zona tái tổ hợp (RZV)', sched: '2 liều cách nhau 1–6 tháng; người ≥ 18 tuổi', minDay: 90, doses: 2 },
+  { k: 'covid', name: 'COVID-19', sched: 'Theo khuyến cáo hiện hành của Bộ Y tế', minDay: 30, repeat: 365 },
+  { k: 'td', name: 'Uốn ván – bạch hầu (± ho gà)', sched: 'Nhắc mỗi 10 năm', minDay: 90, repeat: 3650 },
+  { k: 'hpv', name: 'HPV', sched: '3 liều; 9–26 tuổi (27–45 tuổi theo tư vấn)', minDay: 90, doses: 3, ageMax: 26 }
+];
+const LIVE_VAX = ['Sởi – quai bị – rubella (MMR)', 'Thuỷ đậu sống (Varivax, Varilrix)', 'Zona sống (Zostavax)', 'Lao (BCG)', 'Sốt vàng', 'Cúm dạng xịt mũi (LAIV)', 'Sốt xuất huyết (Qdenga)', 'Viêm não Nhật Bản sống (Imojev)', 'Thương hàn uống (Ty21a)'];
+
+/* Tương tác thuốc – danh sách chọn lọc (chờ BS/dược sĩ duyệt) */
+const CNI = ['tac', 'csa', 'mtor'];
+const IX = [
+  { n: ['paxlovid', 'nirmatrelvir', 'ritonavir'], label: 'Nirmatrelvir/ritonavir (Paxlovid)', sev: 'crit', aff: CNI, eff: 'Ức chế CYP3A4 rất mạnh, nồng độ tacrolimus có thể tăng nhiều lần, gây ngộ độc thận và thần kinh.', act: 'Không tự dùng. Báo BS ghép trước khi điều trị COVID-19; thường phải ngưng hoặc giảm tacrolimus theo chỉ định.' },
+  { n: ['clarithromycin', 'klacid', 'erythromycin', 'erythromycine'], label: 'Clarithromycin, erythromycin', sev: 'crit', aff: CNI, eff: 'Ức chế CYP3A4 mạnh, làm tăng nồng độ tacrolimus/cyclosporin.', act: 'Tránh dùng. Nếu cần kháng sinh nhóm macrolid, hỏi ý kiến BS (azithromycin ít tương tác hơn).' },
+  { n: ['voriconazol', 'voriconazole', 'vfend', 'posaconazol', 'posaconazole', 'itraconazol', 'itraconazole', 'sporal', 'ketoconazol', 'ketoconazole', 'nizoral'], label: 'Kháng nấm nhóm azol mạnh', sev: 'crit', aff: CNI, eff: 'Làm tăng mạnh nồng độ tacrolimus, cyclosporin, sirolimus, everolimus.', act: 'Chỉ dùng khi BS ghép chỉ định, kèm giảm liều và đo lại FK.' },
+  { n: ['fluconazol', 'fluconazole', 'diflucan'], label: 'Fluconazol', sev: 'warn', aff: CNI, eff: 'Làm tăng nồng độ tacrolimus, mức độ phụ thuộc liều.', act: 'Báo BS ghép; cần đo lại FK sau 3–5 ngày.' },
+  { n: ['diltiazem', 'tildiem', 'verapamil', 'isoptin'], label: 'Diltiazem, verapamil', sev: 'warn', aff: CNI, eff: 'Làm tăng nồng độ tacrolimus/cyclosporin.', act: 'Chỉ dùng khi BS ghép biết; đo lại FK sau khi bắt đầu hoặc đổi liều.' },
+  { n: ['amiodaron', 'amiodarone', 'cordarone'], label: 'Amiodaron', sev: 'warn', aff: CNI, eff: 'Làm tăng nồng độ tacrolimus, tác dụng kéo dài.', act: 'Báo BS ghép; theo dõi FK.' },
+  { n: ['letermovir', 'prevymis'], label: 'Letermovir', sev: 'warn', aff: CNI, eff: 'Làm tăng nồng độ tacrolimus và cyclosporin.', act: 'BS sẽ chỉnh liều và theo dõi FK.' },
+  { n: ['metronidazol', 'metronidazole', 'flagyl'], label: 'Metronidazol', sev: 'info', aff: CNI, eff: 'Có thể làm tăng nhẹ nồng độ tacrolimus.', act: 'Báo BS nếu dùng kéo dài; có thể cần đo FK.' },
+  { n: ['metoclopramid', 'metoclopramide', 'primperan'], label: 'Metoclopramid', sev: 'info', aff: CNI, eff: 'Có thể làm tăng nhẹ nồng độ tacrolimus.', act: 'Dùng ngắn ngày theo đơn.' },
+  { n: ['rifampicin', 'rifampin', 'rifabutin'], label: 'Rifampicin, rifabutin', sev: 'crit', aff: CNI, eff: 'Cảm ứng CYP3A4 mạnh, nồng độ tacrolimus giảm sâu, nguy cơ thải ghép.', act: 'Chỉ dùng khi BS ghép chỉ định và theo dõi FK sát.' },
+  { n: ['carbamazepin', 'carbamazepine', 'tegretol', 'phenytoin', 'dilantin', 'phenobarbital', 'gardenal'], label: 'Thuốc chống động kinh cảm ứng men', sev: 'crit', aff: CNI, eff: 'Làm giảm nồng độ tacrolimus/cyclosporin, nguy cơ thải ghép.', act: 'Báo BS ghép trước khi dùng; cần chỉnh liều và theo dõi FK.' },
+  { n: ["st john", 'st. john', 'co ban', 'hypericum'], label: "Cỏ ban (St John's wort)", sev: 'crit', aff: CNI, eff: 'Làm giảm nồng độ tacrolimus/cyclosporin.', act: 'Không dùng.' },
+  { n: ['buoi', 'grapefruit', 'nuoc buoi'], label: 'Bưởi, nước ép bưởi', sev: 'warn', aff: CNI, eff: 'Ức chế CYP3A4 ở ruột, làm tăng nồng độ tacrolimus.', act: 'Tránh ăn bưởi và uống nước ép bưởi.' },
+  { n: ['ibuprofen', 'diclofenac', 'voltaren', 'meloxicam', 'mobic', 'naproxen', 'celecoxib', 'celebrex', 'etoricoxib', 'arcoxia', 'piroxicam', 'ketorolac', 'nsaid', 'aspirin 500'], label: 'Thuốc giảm đau kháng viêm NSAID', sev: 'crit', aff: null, eff: 'Gây co mạch thận, cộng gộp độc thận với tacrolimus/cyclosporin, có thể gây suy thận ghép cấp.', act: 'Không tự dùng. Giảm đau, hạ sốt bằng paracetamol (≤ 3 g/ngày). Aspirin liều thấp chỉ dùng khi BS kê.' },
+  { n: ['gentamicin', 'amikacin', 'tobramycin', 'amphotericin'], label: 'Aminoglycosid, amphotericin B', sev: 'warn', aff: null, eff: 'Độc thận, cộng gộp với thuốc CNI.', act: 'Chỉ dùng tại bệnh viện, có theo dõi creatinin.' },
+  { n: ['allopurinol', 'zyloric', 'febuxostat', 'feburic'], label: 'Allopurinol, febuxostat', sev: 'crit', aff: ['aza'], eff: 'Cùng azathioprin gây ức chế tuỷ xương nặng.', act: 'Chống chỉ định phối hợp nếu không giảm liều azathioprin. Báo BS ghép.' },
+  { n: ['simvastatin', 'lovastatin', 'zocor'], label: 'Simvastatin, lovastatin', sev: 'warn', aff: CNI, eff: 'Tăng nguy cơ tiêu cơ vân (chống chỉ định với cyclosporin).', act: 'Hỏi BS; ưu tiên statin khác liều thấp, báo ngay khi đau cơ.' },
+  { n: ['atorvastatin', 'lipitor', 'atorlip', 'torvalipin'], label: 'Atorvastatin', sev: 'warn', aff: CNI, eff: 'Tacrolimus, cyclosporin làm tăng nồng độ atorvastatin (qua CYP3A4, OATP1B1), tăng nguy cơ đau cơ, tiêu cơ vân; nguy cơ cao hơn khi dùng cùng cyclosporin hoặc colchicin.', act: 'Dùng theo đơn BS ghép, không tự tăng liều (với cyclosporin thường ≤ 10 mg/ngày). Báo BS ngay khi đau cơ, yếu cơ hoặc nước tiểu sẫm màu.' },
+  { n: ['colchicin', 'colchicine'], label: 'Colchicin', sev: 'warn', aff: CNI, eff: 'Tacrolimus, cyclosporin làm tăng nồng độ colchicin (qua P-gp, CYP3A4), gây ngộ độc: tiêu chảy, tiêu cơ vân, ức chế tuỷ, tổn thương thần kinh; nguy cơ cao hơn khi suy thận ghép hoặc dùng cùng statin.', act: 'Chỉ dùng liều thấp theo đơn BS ghép; không tự uống khi lên cơn gout. Báo BS ngay khi tiêu chảy, đau hoặc yếu cơ.' },
+  { n: ['spironolacton', 'spironolactone', 'verospiron', 'eplerenon', 'kali clorid', 'kaleorid', 'losartan', 'telmisartan', 'valsartan', 'irbesartan', 'enalapril', 'perindopril', 'coversyl', 'lisinopril'], label: 'Thuốc giữ kali (ƯCMC, ƯCTT, kháng aldosteron, kali)', sev: 'warn', aff: CNI, eff: 'Cộng gộp với tacrolimus gây tăng kali máu.', act: 'Dùng theo đơn; xét nghiệm kali máu định kỳ.' },
+  { n: ['cotrimoxazol', 'cotrimoxazole', 'bactrim', 'trimethoprim', 'biseptol'], label: 'Cotrimoxazol', sev: 'info', aff: null, eff: 'Liều điều trị có thể tăng kali và tăng creatinin (giảm bài tiết, không phải giảm chức năng thật). Liều dự phòng thường an toàn.', act: 'Dùng theo đơn BS ghép.' },
+  { n: ['ganciclovir', 'cymevene', 'valganciclovir', 'valcyte'], label: 'Ganciclovir, valganciclovir', sev: 'warn', aff: ['mmf', 'aza'], eff: 'Cộng gộp ức chế tuỷ với mycophenolat/azathioprin.', act: 'Xét nghiệm công thức máu định kỳ theo hẹn.' },
+  { n: ['omeprazol', 'omeprazole', 'esomeprazol', 'esomeprazole', 'nexium', 'lansoprazol', 'pantoprazol', 'rabeprazol'], label: 'Thuốc ức chế bơm proton (PPI)', sev: 'info', aff: ['mmf', 'tac'], eff: 'Giảm hấp thu mycophenolat mofetil; omeprazol có thể tăng nhẹ nồng độ tacrolimus.', act: 'Dùng theo đơn; báo BS nếu mới bắt đầu hoặc ngưng.' },
+  { n: ['maalox', 'phosphalugel', 'gaviscon', 'antacid', 'sat sulfat', 'sat fumarat', 'vien sat', 'ferrous', 'tardyferon', 'canxi', 'calcium', 'sevelamer', 'renvela'], label: 'Thuốc kháng acid, sắt, canxi, sevelamer', sev: 'info', aff: ['mmf'], eff: 'Giảm hấp thu mycophenolat.', act: 'Uống cách mycophenolat ít nhất 2 giờ.' },
+  { n: ['thuoc nam', 'thuoc bac', 'thuc pham chuc nang', 'nghe', 'curcumin', 'cam thao', 'linh chi', 'dong trung', 'tang cuong mien dich', 'echinacea'], label: 'Thuốc nam, thuốc bắc, thực phẩm chức năng', sev: 'warn', aff: null, eff: 'Thành phần không rõ; có thể thay đổi nồng độ tacrolimus, gây độc thận hoặc kích thích miễn dịch.', act: 'Không tự dùng. Mang sản phẩm đến hỏi BS ghép.' },
+  { n: ['amlodipin', 'amlodipine', 'amlor', 'nifedipin', 'nifedipine', 'adalat'], label: 'Amlodipin, nifedipin', sev: 'info', aff: CNI, eff: 'Có thể làm tăng nhẹ nồng độ tacrolimus; thường dùng an toàn.', act: 'Dùng theo đơn.' },
+  { n: ['azithromycin', 'zithromax'], label: 'Azithromycin', sev: 'info', aff: CNI, eff: 'Ít tương tác với tacrolimus.', act: 'Dùng theo đơn BS.' },
+  { n: ['metformin', 'glucophage'], label: 'Metformin', sev: 'info', aff: null, eff: 'Không tương tác đáng kể với thuốc ức chế miễn dịch, nhưng cần chỉnh liều theo eGFR.', act: 'Ngưng khi eGFR < 30 hoặc khi mất nước, tiêu chảy.' },
+  { n: ['paracetamol', 'acetaminophen', 'panadol', 'efferalgan', 'hapacol'], label: 'Paracetamol', sev: 'ok', aff: null, eff: 'Không ghi nhận tương tác quan trọng ở liều thường dùng.', act: 'Dùng ≤ 3 g/ngày; đây là lựa chọn giảm đau, hạ sốt ưu tiên.' },
+  { n: ['amoxicillin', 'augmentin', 'cefuroxim', 'cefuroxime', 'zinnat', 'cefixim', 'cefixime'], label: 'Amoxicillin, cephalosporin uống', sev: 'ok', aff: null, eff: 'Không ghi nhận tương tác quan trọng với tacrolimus.', act: 'Dùng theo đơn; báo BS nếu sốt hoặc tiêu chảy.' },
+  { n: ['linagliptin', 'trajenta', 'insulin'], label: 'Linagliptin, insulin', sev: 'ok', aff: null, eff: 'Không ghi nhận tương tác quan trọng; không cần chỉnh liều linagliptin theo chức năng thận.', act: 'Dùng theo đơn; theo dõi đường huyết.' }
+];
+function findIx(q) {
+  const nq = norm(q); if (nq.length < 3) return [];
+  return IX.filter(r => r.n.some(a => { const na = norm(a); return nq.includes(na) || (na.includes(nq) && nq.length >= 3); }));
+}
+function patientCls(p) { return new Set(p.meds.map(m => m.cls).filter(Boolean)); }
+function ixApplies(p, r) { if (!r.aff) return true; const c = patientCls(p); return r.aff.some(a => c.has(a)); }
+function medIx(p, m) { if (m.cls) return null; const rs = findIx(m.name).filter(r => r.sev !== 'ok' && ixApplies(p, r)); return rs[0] || null; }
+
+/* ================= Quy tắc cảnh báo (tạm, chờ BS duyệt) ================= */
+function c0Hours(e) { const a = hm(e.doseT), b = hm(e.drawT); if (a == null || b == null) return null; let h = (b - a) / 60; if (h <= 0) h += 24; return h; }
+function entryAlerts(p, e) {
+  const out = [], day = diffDays(p.txDate, e.date);
+  const add = (lv, k, title, act) => out.push({ lv, k, title, act, date: e.date });
+  const tg = tgtForEntry(p, e, 'tac');
+  const co = e.cr != null ? crOf(p, e) : null;
+  if (co && co.base) {
+    const bc = co.base, r = co.r, pc = Math.round(r * 100);
+    if (r > 0.30) {
+      let a = 'Có tổn thương thận cấp (AKI) ở thận ghép. Liên hệ BS điều trị trong 24 giờ để xét nghiệm lại và tìm nguyên nhân: thải ghép, ngộ độc thuốc, mất nước, tắc nghẽn, nhiễm trùng.';
+      if (e.tac != null && tg && e.tac < tg[0]) a += ' FK thấp kèm creatinin tăng: cần loại trừ thải ghép cấp.';
+      add('crit', 'cr', `Cảnh báo AKI: creatinin ${fmtN(e.cr)} µmol/L, tăng ${pc}% so với creatinin nền ${bc} (${co.lbl})`, a);
+    } else if (r >= 0.15) add('warn', 'cr', `Creatinin ${fmtN(e.cr)} µmol/L, tăng ${pc}% so với creatinin nền ${bc} (${co.lbl}): nguy cơ AKI`, 'Nguy cơ tổn thương thận cấp (AKI). Uống đủ nước; xét nghiệm lại creatinin trong 48–72 giờ và báo BS kết quả.');
+    else if (co.rp != null && co.rp >= 0.20) add('warn', 'cr', `Creatinin ${fmtN(e.cr)} µmol/L, tăng ${Math.round(co.rp * 100)}% so với lần trước (${fmtN(co.prev.cr)} ngày ${fmtD(co.prev.date)})`, 'Chưa tới ngưỡng AKI nhưng tăng nhanh. Uống đủ nước; xét nghiệm lại creatinin trong 1 tuần hoặc theo hẹn của BS.');
+  }
+  if (e.tac != null) {
+    const t = fmtN(e.tac, 1);
+    if (e.tac >= 15) add('crit', 'tac', `Nồng độ FK ${t} ng/mL, rất cao`, 'Nguy cơ độc thận, độc thần kinh. Báo BS ngay để chỉnh liều.');
+    else if (e.tac < 3) add('crit', 'tac', `Nồng độ FK ${t} ng/mL, rất thấp`, 'Nguy cơ thải ghép cao. Báo BS ngay; xem lại việc uống thuốc.');
+    else if (tg && e.tac < tg[0]) add('warn', 'tac', `FK ${t} ng/mL, thấp hơn khung đích ${mg(tg[0])}–${mg(tg[1])}`, 'Tăng nguy cơ thải ghép. Xem lại việc uống thuốc đúng giờ, đủ liều; không tự tăng liều. Báo BS.');
+    else if (tg && e.tac > tg[1]) add('warn', 'tac', `FK ${t} ng/mL, cao hơn khung đích ${mg(tg[0])}–${mg(tg[1])}`, 'Nguy cơ độc thận, run tay, tăng đường huyết. Không tự giảm liều; báo BS.');
+    const h = c0Hours(e);
+    if (h != null) { const [a, b] = p.tacOnce === 'yes' ? [22, 26] : [10, 14]; if (h < a || h > b) add('info', 'c0', `Lấy máu sau liều uống ${fmtN(h, 1)} giờ`, `Chưa đúng thời điểm nồng độ đáy (C0), khuyến nghị ${a}–${b} giờ sau liều. Đọc kết quả FK thận trọng.`); }
+  }
+  [['tac', 'tacrolimus'], ['evr', 'everolimus'], ['srl', 'sirolimus']].forEach(([kind, nm]) => {
+    const [a, b] = DOSEK[kind]; if (!has(e[a]) && !has(e[b])) return;
+    const pv = prevWith(p, e, [a, b]); if (!pv) return;
+    if (Math.abs(dTot(e[a], e[b]) - dTot(pv[a], pv[b])) > 1e-9 || +e[a] !== +pv[a]) add('info', 'dose_' + kind, `Đổi liều ${nm}: ${fmtDose(pv[a], pv[b])} → ${fmtDose(e[a], e[b])}`, 'Uống đúng liều mới từ hôm nay. Đo lại nồng độ thuốc theo hẹn của BS (thường sau 3–5 ngày).');
+  });
+  ['evr', 'srl'].forEach(kind => {
+    const v = e[kind]; if (v == null) return;
+    const tE = tgtForEntry(p, e, kind); if (!tE) return; const [lo, hi] = tE, t = fmtN(v, 1);
+    if (v < lo) add('warn', kind, `${DRUG[kind]} ${t} ng/mL, thấp hơn khung đích ${mg(lo)}–${mg(hi)}`, 'Tăng nguy cơ thải ghép. Xem lại việc uống thuốc đúng giờ, đủ liều; không tự tăng liều. Báo BS.');
+    else if (v > hi) add('warn', kind, `${DRUG[kind]} ${t} ng/mL, cao hơn khung đích ${mg(lo)}–${mg(hi)}`, 'Tăng nguy cơ tác dụng phụ: loét miệng, phù, tăng mỡ máu, tăng đạm niệu, chậm lành vết thương, viêm phổi kẽ. Không tự giảm liều; báo BS.');
+  });
+  if (e.sbp != null || e.dbp != null) {
+    const s = e.sbp || 0, d = e.dbp || 0, bp = `${e.sbp ?? '—'}/${e.dbp ?? '—'} mmHg`;
+    if (s >= 180 || d >= 110) add('crit', 'bp', `Huyết áp ${bp}, rất cao`, 'Nằm nghỉ ngơi, đo lại huyết áp sau 15 phút. Nếu vẫn ≥ 180/110 mmHg hoặc kèm đau đầu, đau ngực, khó thở: báo BS ngay và đến bệnh viện gần nhất để cấp cứu.');
+    else if (e.sbp != null && s < 90) add('crit', 'bp', `Huyết áp ${bp}, thấp`, 'Có thể do mất nước hoặc nhiễm trùng, nguy cơ giảm tưới máu thận ghép. Báo BS ngay và nhập viện.');
+    else if (s >= 130 || d >= 80) add('warn', 'bp', `Huyết áp ${bp}, cao hơn mục tiêu < 130/80 mmHg`, 'Nếu không có triệu chứng bất thường: đo lại 2 lần/ngày trong 3 ngày và báo BS khi tái khám.');
+  }
+  if (e.hr != null) {
+    if (e.hr > 120 || e.hr < 45) add('crit', 'hr', `Mạch ${e.hr} lần/phút`, 'Báo BS ngay và đến bệnh viện cấp cứu, nhất là khi kèm mệt, choáng, đau ngực.');
+    else if (e.hr > 100 || e.hr < 50) add('warn', 'hr', `Mạch ${e.hr} lần/phút`, 'Nghỉ ngơi rồi đo lại; báo BS nếu vẫn còn bất thường.');
+  }
+  if (e.temp != null) {
+    if (e.temp >= 38) add('crit', 'temp', `Nhiệt độ ${fmtN(e.temp, 1)}°C`, 'Sốt ở người dùng thuốc ức chế miễn dịch: báo BS ngay; không tự dùng kháng sinh hay NSAID.');
+    else if (e.temp >= 37.5) add('warn', 'temp', `Nhiệt độ ${fmtN(e.temp, 1)}°C`, 'Đo lại sau 4 giờ; báo BS nếu ≥ 38°C.');
+  }
+  if (e.wt != null) {
+    const prev = p.entries.filter(x => x !== e && x.wt != null && x.date < e.date && diffDays(x.date, e.date) <= 7).pop();
+    if (prev && e.wt - prev.wt >= 2) add('warn', 'wt', `Tăng ${fmtN(e.wt - prev.wt, 1)} kg trong ${diffDays(prev.date, e.date)} ngày`, 'Có thể do giữ nước. Theo dõi phù và lượng nước tiểu, báo BS.');
+  }
+  if (e.glu != null) {
+    const fast = e.gluType !== 'batky', g = fmtN(e.glu, 1);
+    if (e.glu < 3.9) add('crit', 'glu', `Đường huyết ${g} mmol/L, hạ đường huyết`, 'Ăn hoặc uống ngay 15 g đường, đo lại sau 15 phút; báo BS.');
+    else if (e.glu >= 16.7) add('crit', 'glu', `Đường huyết ${g} mmol/L, rất cao`, 'Báo BS để xử trí khẩn.');
+    else if ((fast && e.glu >= 7.0) || (!fast && e.glu >= 11.1)) add('warn', 'glu', `Đường huyết ${fast ? 'lúc đói' : 'bất kỳ'} ${g} mmol/L`, 'Gợi ý tăng đường huyết hoặc đái tháo đường sau ghép. Báo BS để kiểm tra HbA1c hoặc nghiệm pháp dung nạp glucose.');
+  }
+  if (e.prot != null) {
+    if (e.prot >= 3) add('crit', 'prot', `Đạm niệu ${fmtN(e.prot, 2)} g/24 giờ`, 'Đạm niệu mức thận hư. Báo BS để xử trí sớm.');
+    else if (e.prot >= 0.5) add('warn', 'prot', `Đạm niệu ${fmtN(e.prot, 2)} g/24 giờ, tăng`, 'Báo BS khi tái khám; có thể cần tìm nguyên nhân (thải ghép qua kháng thể, tái phát bệnh, DSA) hoặc sinh thiết.');
+  }
+  if (e.hba1c != null) {
+    const h = fmtN(e.hba1c, 1), dm = p.dm && p.dm !== 'no';
+    const hT = has(p.hba1cTgt) && +p.hba1cTgt >= 5 ? +p.hba1cTgt : 7;
+    if (dm && e.hba1c >= hT) add('warn', 'hba1c', `HbA1c ${h}%, chưa đạt mục tiêu < ${fmtN(hT, 1)}%`, 'Đường huyết chưa kiểm soát tốt. Mang sổ đo đường huyết khi tái khám để BS chỉnh thuốc, chế độ ăn.');
+    else if (!dm && e.hba1c >= 6.5) add('warn', 'hba1c', `HbA1c ${h}% (≥ 6,5%)`, 'Gợi ý đái tháo đường sau ghép. Báo BS để xác định chẩn đoán và theo dõi.');
+    if (day < 45) add('info', 'hba1c45', 'HbA1c trong 45 ngày đầu sau ghép có thể không chính xác', 'Thiếu máu và truyền máu sau mổ làm sai lệch HbA1c; BS sẽ dựa thêm vào đường huyết.');
+  }
+  if (e.cmv != null && e.cmv > 0) {
+    if (e.cmv > 500) add('crit', 'cmv', `CMV DNA máu ${fmtN(e.cmv)} copies/mL (dương tính)`, 'Nhiễm CMV. Liên hệ BS để được điều trị ngay.');
+    else add('warn', 'cmv', `CMV DNA máu ${fmtN(e.cmv)} copies/mL (dương tính)`, 'Nhiễm CMV. Liên hệ BS điều trị để chỉnh liều thuốc.');
+  }
+  if (e.bkv != null && e.bkv > 0) {
+    if (e.bkv >= 10000) add('crit', 'bkv', `BKV DNA máu ${fmtN(e.bkv)} copies/mL, mức cao`, 'Nguy cơ bệnh thận do BK virus. Liên hệ BS để điều trị ngay.');
+    else add('warn', 'bkv', `BKV DNA máu ${fmtN(e.bkv)} copies/mL (dương tính)`, 'Phát hiện BK virus trong máu. Liên hệ BS điều trị để theo dõi và chỉnh liều thuốc.');
+  }
+  (e.sym || []).forEach(k => { const s = SYM.find(x => x[0] === k); if (s) add(s[2], 'sym', s[1], s[3]); });
+  const rank = { crit: 0, warn: 1, info: 2 };
+  return out.sort((a, b) => rank[a.lv] - rank[b.lv]);
+}
+function worst(alerts, keys) { const a = alerts.filter(x => !keys || keys.includes(x.k)); return a.some(x => x.lv === 'crit') ? 'crit' : a.some(x => x.lv === 'warn') ? 'warn' : 'ok'; }
+
+function adherence(p, days = 7) {
+  let exp = 0, got = 0;
+  for (let i = 1; i <= days; i++) {
+    const d = addDays(TODAY, -i), log = p.doses[d]; if (!log) continue;
+    p.meds.forEach(m => m.times.forEach(t => { exp++; if (log[m.id + '@' + t]) got++; }));
+  }
+  return exp ? Math.round(got / exp * 100) : null;
+}
+
+function vaxStatus(p, v) {
+  const day = diffDays(p.txDate, TODAY), recs = (p.vax[v.k] || []).slice().sort(), last = recs[recs.length - 1];
+  const from = `Từ ${fmtD(addDays(p.txDate, v.minDay))}`;
+  if (v.hbv) {
+    if (p.antiHBs == null || p.antiHBs === '') return { s: 'due', t: 'Cần xét nghiệm anti-HBs' };
+    if (+p.antiHBs < 10) return day < v.minDay ? { s: 'notyet', t: from } : { s: 'due', t: `anti-HBs ${p.antiHBs} mIU/mL: cần tiêm nhắc` };
+    return { s: 'done', t: `anti-HBs ${p.antiHBs} mIU/mL` };
+  }
+  if (v.doses) {
+    if (recs.length >= v.doses) return { s: 'done', t: `Đủ ${v.doses} liều · gần nhất ${fmtD(last)}` };
+    if (v.ageMax && ageAt(p.dob, TODAY) > v.ageMax) return { s: 'na', t: 'Ngoài độ tuổi khuyến cáo thường quy' };
+    if (day < v.minDay) return { s: 'notyet', t: from };
+    return { s: 'due', t: recs.length ? `Đã tiêm ${recs.length}/${v.doses} liều` : 'Chưa tiêm' };
+  }
+  if (last && diffDays(last, TODAY) < v.repeat) return { s: 'done', t: `Đã tiêm ${fmtD(last)} · lần tới ${fmtD(addDays(last, v.repeat))}` };
+  if (day < v.minDay) return { s: 'notyet', t: from };
+  return { s: 'due', t: last ? `Lần gần nhất ${fmtD(last)}` : 'Chưa có ghi nhận' };
+}
+
+/* ================= Dữ liệu mẫu (giả) ================= */
+function rngOf(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function interp(knots, x) {
+  if (x <= knots[0][0]) return knots[0][1];
+  for (let i = 1; i < knots.length; i++) if (x <= knots[i][0]) { const [x0, y0] = knots[i - 1], [x1, y1] = knots[i]; return y0 + (y1 - y0) * (x - x0) / (x1 - x0); }
+  return knots[knots.length - 1][1];
+}
+function basePatient(o) {
+  return Object.assign({
+    id: uid(), hospitalId: '', name: '', sex: 'M', dob: '1980-01-01', txNumber: '1', preemptive: 'no', donorType: 'LD', related: 'yes', donorRelation: '', blood: '',
+    hlaA: 0, hlaB: 0, hlaDR: 0, pra: 0, dsa: 'Âm tính', cmv: 'D+/R+', ebv: 'D+/R+', txDate: TODAY, induction: '', maint: '', disDate: '', crDis: '', cr1y: '', tacOnce: 'no',
+    antiHBs: '', nextAppt: '', nextNote: '', drName: '', drPhone: '', dm: 'no', regimen: 'tac_mpa', regimenFrom: '', tbl: JSON.parse(JSON.stringify(DEF_TBL)), meds: [], doses: {}, entries: [], biopsies: [], events: [], vax: {}, demo: true
+  }, o);
+}
+function genEntries(p, sp) {
+  const rnd = rngOf(sp.seed), n = () => rnd() * 2 - 1, maxDay = diffDays(p.txDate, sp.end);
+  const out = []; let lastBlock = -1;
+  const mk = (day) => {
+    const c = sp.curve(day), date = addDays(p.txDate, day);
+    const e = { id: uid(), date, kind: 'dinhky', hr: Math.round(c.hr + n() * 5), sbp: Math.round(c.sbp + n() * 7), dbp: Math.round(c.dbp + n() * 5), wt: +(c.wt + n() * 0.4).toFixed(1), temp: +(36.6 + n() * 0.25).toFixed(1),
+      cr: Math.round(c.cr * (1 + n() * 0.035)), tac: +(Math.max(2, c.tac + n() * 0.9)).toFixed(1), glu: +(c.glu + n() * 0.35).toFixed(1), gluType: 'doi', prot: null, doseT: sp.doseT, drawT: '07:30', sym: [], note: '' };
+    const blk = Math.floor(day / 90);
+    if (day >= 28 && blk !== lastBlock) { e.prot = +(c.prot * (1 + n() * 0.1)).toFixed(2); lastBlock = blk; }
+    if (sp.dose) { const d = sp.dose(day); e.tdAM = d[0]; e.tdPM = d[1]; }
+    if (sp.evr) { const v = sp.evr(day); if (v) { e.evr = +(Math.max(1, v.v + n() * 0.8)).toFixed(1); e.edAM = v.a; e.edPM = v.b; } }
+    return e;
+  };
+  seedOffsets(maxDay).forEach(d => out.push(mk(d)));
+  (sp.over || []).forEach(o => {
+    let e = out.find(x => x.date === o.date);
+    if (!e) { e = mk(diffDays(p.txDate, o.date)); out.push(e); }
+    Object.assign(e, o);
+  });
+  return out.sort((a, b) => a.date < b.date ? -1 : 1);
+}
+function med(name, dose, times, cls, note) { const m = { id: uid(), name, dose, times, cls: cls || '', note: note || '' }; medTd(m); return m; }
+/* Liều theo từng giờ uống: m.td = { '08:00': 2.5, '20:00': 2.5 }, m.unit = 'mg' */
+const pnum = s => { const n = parseFloat(String(s).replace(',', '.')); return isFinite(n) ? n : null; };
+function medTd(m) {
+  if (m.td || !m.dose || !m.times || !m.times.length) return m;
+  const d = String(m.dose).toLowerCase(), u = /viên/.test(d) ? 'viên' : 'mg';
+  let mm = d.match(/^\s*(\d+(?:[.,]\d+)?)\s*(mg|viên)?\s*(\/\s*ngày)?\s*$/);
+  if (mm) { const n = pnum(mm[1]); if (mm[3] && m.times.length > 1) return m; m.td = {}; m.times.forEach(t => { m.td[t] = n; }); m.unit = mm[2] || u; return m; }
+  mm = d.match(/(\d+(?:[.,]\d+)?)\s*mg\s*sáng\D+(\d+(?:[.,]\d+)?)\s*mg\s*tối/);
+  if (mm && m.times.length === 2) { m.td = { [m.times[0]]: pnum(mm[1]), [m.times[1]]: pnum(mm[2]) }; m.unit = 'mg'; }
+  return m;
+}
+function doseText(m) {
+  if (!m.td) return m.dose || '';
+  const u = m.unit || 'mg', ts = m.times.filter(t => m.td[t] != null), v = ts.map(t => +m.td[t]), tot = +v.reduce((a, c) => a + c, 0).toFixed(3);
+  if (!ts.length) return m.dose || '';
+  if (ts.length === 1) return `${mg(v[0])} ${u}/ngày, uống lúc ${ts[0]}`;
+  if (v.every(x => x === v[0])) return `${mg(v[0])} ${u} × ${ts.length} lần/ngày (tổng ${mg(tot)} ${u}/ngày)`;
+  return ts.map((t, i) => `${mg(v[i])} ${u} lúc ${t}`).join(' + ') + ` (tổng ${mg(tot)} ${u}/ngày)`;
+}
+function seedDoses(p, misses) {
+  for (let i = 1; i <= 14; i++) {
+    const d = addDays(TODAY, -i), log = {};
+    p.meds.forEach(m => m.times.forEach(t => { log[m.id + '@' + t] = !misses.some(([dd, tt]) => dd === i && tt === t); }));
+    p.doses[d] = log;
+  }
+}
+function seed() {
+  const p1 = basePatient({
+    hospitalId: 'GT-26-0041', name: 'Nguyễn Văn An', sex: 'M', dob: '1985-03-12', txNumber: '1', preemptive: 'no', donorType: 'LD', related: 'yes', donorRelation: 'Em gái ruột', blood: 'O → O',
+    hlaA: 1, hlaB: 0, hlaDR: 1, pra: 0, dsa: 'Âm tính', cmv: 'D+/R+', ebv: 'D+/R+', txDate: '2026-06-15', induction: 'Basiliximab', maint: 'Tacrolimus + MMF + Methylprednisolon', disDate: '2026-07-06', crDis: 105, tacOnce: 'no', antiHBs: 120,
+    drName: 'BS. Phạm Minh Khoa', drPhone: '0900 000 001', nextAppt: '2026-10-06', nextNote: 'Xét nghiệm lại creatinin, FK, tổng phân tích nước tiểu; cân nhắc sinh thiết thận ghép nếu creatinin không giảm.',
+    vax: { pcv: ['2025-12-10'], td: ['2020-05-04'] }
+  });
+  p1.meds = [med('Tacrolimus (Prograf)', '2,5 mg', ['08:00', '20:00'], 'tac'), med('Mycophenolat mofetil (CellCept)', '750 mg', ['08:00', '20:00'], 'mmf'), med('Methylprednisolon (Medrol)', '8 mg', ['08:00'], 'pred'), med('Cotrimoxazol 480 mg (dự phòng PJP)', '1 viên', ['08:00']), med('Valganciclovir (dự phòng CMV)', '450 mg', ['08:00'])];
+  p1.entries = genEntries(p1, {
+    seed: 11, end: '2026-09-30', doseT: '20:00',
+    dose: d => d < 44 ? [3, 3] : d < 60 ? [2, 2] : [2.5, 2.5],
+    curve: d => ({ cr: d < 21 ? 105 + (21 - d) * 6.5 : 104, tac: d <= 30 ? 10.2 : d <= 90 ? 8.2 : 6.6, glu: 5.4, sbp: 128, dbp: 80, hr: 80, wt: 62 + Math.min(d / 40, 2.4), prot: 0.17 }),
+    over: [
+      { date: '2026-07-29', kind: 'batthuong', cr: 129, tac: 15.2, temp: 37.6, hr: 98, sbp: 112, dbp: 70, sym: ['tieuchay'], note: 'Tiêu chảy 5–6 lần/ngày trong 2 ngày. Nhập viện bù dịch, giảm liều tacrolimus tạm thời.' },
+      { date: '2026-09-14', cmv: 0, bkv: 0 },
+      { date: '2026-09-28', cr: 118, tac: 5.6 },
+      { date: '2026-10-01', kind: 'batthuong', cr: 138, tac: 4.8, cmv: 0, bkv: 1800, advice: 'Uống tacrolimus đúng 8 giờ sáng và 8 giờ tối, đặt báo thức; không tự tăng liều. Thử lại creatinin, FK, BKV ngày 06/10: nhịn ăn sáng, chưa uống tacrolimus trước khi lấy máu. Đo huyết áp sáng và tối, ghi vào sổ.', sbp: 148, dbp: 92, hr: 84, glu: 5.6, prot: 0.24, sym: ['quenthuoc'], note: 'Quên uống thuốc buổi tối 3 ngày tuần trước. Đi khám vì đo huyết áp ở nhà tăng.' }
+    ]
+  });
+  p1.events = [{ id: uid(), date: '2026-07-29', end: '2026-07-31', type: 'nhiemtrung', hosp: 'yes', detail: 'Tiêu chảy cấp, mất nước; FK tăng 15,2 ng/mL. Bù dịch, giảm liều tacrolimus tạm thời.' }];
+  seedDoses(p1, [[8, '20:00'], [9, '20:00'], [10, '20:00'], [3, '20:00'], [6, '20:00']]);
+
+  const p2 = basePatient({
+    hospitalId: 'GT-25-0017', dm: 'ptdm', name: 'Trần Thị Bình', sex: 'F', dob: '1972-08-20', txNumber: '2', preemptive: 'no', donorType: 'BDD', related: 'no', donorRelation: 'Người hiến chết não', blood: 'A → A',
+    hlaA: 2, hlaB: 1, hlaDR: 1, pra: 35, dsa: 'Âm tính (MFI < 1000)', cmv: 'D+/R−', ebv: 'D+/R+', txDate: '2025-04-10', induction: 'Thymoglobulin (ATG)', maint: 'Tacrolimus + MMF + Methylprednisolon', disDate: '2025-05-08', crDis: 146, cr1y: 126, tacOnce: 'no', antiHBs: 8,
+    drName: 'BS. Võ Thanh Hà', drPhone: '0900 000 002', nextAppt: '2026-10-16', nextNote: 'Đạm niệu 24 giờ, DSA, HbA1c. Mang theo sổ đo đường huyết.',
+    vax: { cum: ['2025-09-28'], pcv: ['2025-08-15'], rzv: ['2025-09-10', '2025-11-12'], covid: ['2025-09-28'], td: ['2019-03-02'] }
+  });
+  p2.meds = [med('Tacrolimus (Prograf)', '2 mg sáng · 1,5 mg tối', ['08:00', '20:00'], 'tac'), med('Mycophenolat mofetil (CellCept)', '500 mg', ['08:00', '20:00'], 'mmf'), med('Methylprednisolon (Medrol)', '4 mg', ['08:00'], 'pred'), med('Linagliptin (Trajenta)', '5 mg', ['08:00']), med('Amlodipin', '5 mg', ['08:00']), med('Omeprazol', '20 mg', ['07:00'])];
+  p2.entries = genEntries(p2, {
+    seed: 23, end: '2026-09-20', doseT: '20:00',
+    dose: d => d < 56 ? [3, 3] : d < 120 ? [4, 3.5] : d < 365 ? [2.5, 2.5] : [2, 1.5],
+    curve: d => ({
+      cr: interp([[10, 420], [14, 262], [21, 186], [28, 146], [42, 123], [49, 127], [55, 180], [60, 190], [66, 158], [77, 134], [91, 124], [210, 127], [222, 152], [240, 129], [540, 132]], d),
+      tac: interp([[10, 9], [42, 10.4], [55, 6.1], [62, 11], [91, 10], [365, 7], [540, 6.6]], d),
+      glu: interp([[10, 6.0], [60, 6.4], [91, 7.5], [126, 8.3], [140, 7.0], [200, 6.6], [540, 6.7]], d),
+      sbp: 134, dbp: 82, hr: 78, wt: 54 + Math.min(d / 200, 1.6), prot: interp([[28, 0.33], [200, 0.27], [400, 0.31], [480, 0.44], [540, 0.62]], d)
+    }),
+    over: [
+      { date: '2025-06-05', kind: 'batthuong', cr: 192, tac: 6.1, tgLo: 10, tgHi: 12, sym: ['tieuit', 'dauvungghep'], note: 'Tiểu ít, căng tức vùng thận ghép 2 ngày.' },
+      { date: '2025-07-15', bkv: 0 },
+      { date: '2025-08-14', glu: 8.3, hba1c: 6.9, tgLo: 6, tgHi: 10, note: 'Chẩn đoán đái tháo đường sau ghép. Hạ khung FK đích về 6–10.' },
+      { date: '2025-11-06', hba1c: 7.2 },
+      { date: '2025-12-06', cmv: 1200 },
+      { date: '2026-01-05', cmv: 0 },
+      { date: '2026-02-04', hba1c: 6.8 },
+      { date: '2026-07-09', hba1c: 6.9, bkv: 0 },
+      { date: '2026-04-16', hba1c: 6.6, cmv: 0, bkv: 0, tgLo: 5, tgHi: 8, note: 'Sinh thiết theo quy trình 12 tháng. Khung FK đích 5–8.' },
+      { date: '2025-11-18', kind: 'batthuong', temp: 38.4, hr: 104, cr: 152, sym: ['sot', 'tieuchay'], cmv: 45000, note: 'Sốt 3 ngày, mệt.' },
+      { date: '2026-09-20', prot: 0.62, hba1c: 7.3, advice: 'Giữ nguyên liều thuốc. Ăn giảm đường, tinh bột; đo đường huyết lúc đói 3 lần/tuần. Lấy nước tiểu 24 giờ ngày trước tái khám. Tái khám 16/10 làm DSA, HbA1c.' }
+    ]
+  });
+  p2.biopsies = [
+    { id: uid(), date: '2025-06-06', ind: 'chidinh', banff: 'tcmr', grade: 'IB', detail: 'i2, t3, v0; C4d âm tính; DSA âm tính.', tx: 'Methylprednisolon 500 mg × 3 ngày, sau đó giảm liều corticoid.' },
+    { id: uid(), date: '2026-04-16', ind: 'quytrinh', banff: 'ifta', grade: 'Độ I', detail: 'Không thải ghép. ci1, ct1. Nhuộm SV40 âm tính.', tx: 'Không thay đổi điều trị.' }
+  ];
+  p2.events = [
+    { id: uid(), date: '2025-04-12', end: '2025-05-08', type: 'khac', hosp: 'yes', detail: 'Chậm chức năng thận ghép (DGF), lọc máu 2 lần sau ghép. Xuất viện ngày 28 sau ghép, creatinin 146 µmol/L.' },
+    { id: uid(), date: '2025-06-05', end: '2025-06-12', type: 'thaighep', hosp: 'yes', detail: 'Thải ghép cấp TCMR Banff IB, xác định bằng sinh thiết. Methylprednisolon xung 3 ngày.' },
+    { id: uid(), date: '2025-08-14', end: '', type: 'dtd', hosp: 'no', detail: 'Đái tháo đường sau ghép (PTDM): glucose đói 8,3 mmol/L, HbA1c 6,9%. Bắt đầu linagliptin.' },
+    { id: uid(), date: '2025-11-18', end: '2025-11-28', type: 'nhiemtrung', hosp: 'yes', detail: 'Nhiễm CMV có triệu chứng sau ngưng dự phòng valganciclovir. Ganciclovir tĩnh mạch.' }
+  ];
+  seedDoses(p2, [[5, '20:00']]);
+
+  const p3 = basePatient({
+    hospitalId: 'GT-23-0062', name: 'Lê Minh Châu', sex: 'M', dob: '1996-11-02', txNumber: '1', preemptive: 'yes', donorType: 'LD', related: 'yes', donorRelation: 'Mẹ ruột', blood: 'B → B',
+    hlaA: 1, hlaB: 1, hlaDR: 0, pra: 0, dsa: 'Âm tính', cmv: 'D+/R+', ebv: 'D+/R+', txDate: '2023-09-20', induction: 'Basiliximab', maint: 'Tacrolimus liều thấp + Everolimus + Methylprednisolon (chuyển từ MPA tháng 24)', disDate: '2023-10-11', crDis: 104, cr1y: 100, tacOnce: 'yes', regimen: 'tac_evr', regimenFrom: '2025-09-14', antiHBs: 85,
+    drName: 'BS. Phạm Minh Khoa', drPhone: '0900 000 001', nextAppt: '2026-12-08', nextNote: 'Tái khám định kỳ 3 tháng.',
+    vax: { cum: ['2025-10-02'], pcv: ['2024-01-15'], rzv: ['2024-02-01', '2024-04-03'], covid: ['2025-10-02'], td: ['2022-06-10'], hpv: ['2018-03-01', '2018-05-02', '2018-09-04'] }
+  });
+  p3.meds = [med('Tacrolimus phóng thích kéo dài (Advagraf)', '2 mg/ngày', ['08:00'], 'tac'), med('Everolimus (Certican)', '1 mg sáng + 1 mg tối', ['08:00', '20:00'], 'mtor'), med('Methylprednisolon (Medrol)', '4 mg', ['08:00'], 'pred')];
+  p3.entries = genEntries(p3, {
+    seed: 37, end: '2026-09-15', doseT: '08:00',
+    dose: d => d < 120 ? [8, null] : d < 365 ? [6, null] : d < 725 ? [4, null] : [2, null],
+    evr: d => d < 735 ? null : { v: 5.2, a: 1, b: 1 },
+    curve: d => ({ cr: interp([[10, 150], [21, 104], [60, 97], [1100, 103]], d), tac: interp([[10, 10], [90, 9], [120, 8], [365, 7], [725, 6.4], [740, 4.2], [1100, 4.0]], d), glu: 5.0, sbp: 119, dbp: 75, hr: 72, wt: 66 + Math.min(d / 365, 2.8), prot: 0.11 }),
+    over: [{ date: '2025-01-14', kind: 'batthuong', temp: 38.6, hr: 108, cr: 112, sym: ['sot', 'khotho'], note: 'Sốt, ho đàm, khó thở nhẹ 2 ngày.' },
+      { date: '2025-09-14', tac: 6.3, tdAM: 2, tdPM: null, edAM: 0.75, edPM: 0.75, tgLo: 3, tgHi: 5, egLo: 3, egHi: 8, note: 'Chuyển MPA sang everolimus 0,75 mg × 2; giảm tacrolimus còn 2 mg/ngày. Khung đích: FK 3–5, everolimus 3–8 ng/mL.' },
+      { date: '2025-09-24', tac: 4.1, evr: 2.6, edAM: 1, edPM: 1, note: 'Everolimus thấp: tăng liều lên 1 mg × 2.' },
+      { date: '2025-10-08', tac: 4.4, evr: 4.9, edAM: 1, edPM: 1 },
+      { date: '2025-12-13', cmv: 0, bkv: 0 },
+      { date: '2026-09-09', advice: 'Duy trì Advagraf 2 mg sáng, everolimus 1 mg × 2. Kiểm tra mỡ máu, đạm niệu lần sau. Báo ngay nếu loét miệng, phù chân.' }]
+  });
+  p3.biopsies = [{ id: uid(), date: '2024-09-26', ind: 'quytrinh', banff: 'binhthuong', grade: '', detail: 'Không thải ghép, không xơ hoá đáng kể.', tx: 'Không thay đổi điều trị.' }];
+  p3.events = [{ id: uid(), date: '2025-01-14', end: '2025-01-19', type: 'nhiemtrung', hosp: 'yes', detail: 'Viêm phổi cộng đồng; ceftriaxon tĩnh mạch. FK ổn định trong đợt điều trị.' }];
+  seedDoses(p3, []);
+
+  return { v: 6, cur: p1.id, pin: '', patients: [p1, p2, p3] };
+}
+/* ================= Trạng thái ================= */
+/* BUILD = 'pwa' trong bản phát hành (index.html), không khai báo trong bản mẫu trên claude.ai */
+const PWA = typeof BUILD !== 'undefined' && BUILD === 'pwa';
+const DEMO = !PWA || /[?&]demo=1/.test(location.search);
+const STORE = !PWA ? 'so-than-ghep-proto-v6' : DEMO ? 'so-than-ghep-demo' : 'so-than-ghep-data';
+const APP_VER = '1.0-thu-nghiem';
+function freshState() { if (DEMO) return seed(); const p = basePatient({ demo: false, name: '', txDate: TODAY, nextAppt: '' }); return { v: 6, cur: p.id, pin: '', patients: [p], fresh: true }; }
+let S = load();
+/* Trình xem claude.ai chạy trang trong khung sandbox không cho gửi form: bấm nút Lưu hoặc Enter
+   sẽ không phát sự kiện submit. Tự phát sự kiện submit (không gửi form thật) để mọi form vẫn chạy. */
+function fireSubmit(f) { f.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }
+document.addEventListener('click', ev => { const b = ev.target.closest('button, input[type="submit"]'); if (!b || b.type !== 'submit' || !b.form || b.disabled) return; ev.preventDefault(); fireSubmit(b.form); }, true);
+document.addEventListener('keydown', ev => { if (ev.key !== 'Enter' || ev.isComposing) return; const t = ev.target; if (!t || !t.form || ['TEXTAREA', 'BUTTON', 'SELECT'].includes(t.tagName) || ['checkbox', 'radio', 'file', 'button'].includes(t.type)) return; ev.preventDefault(); fireSubmit(t.form); }, true);
+const UI = { tab: 'home', range: 'all', view: 'chart', editProfile: false, saved: null, ixq: '' };
+function load() { try { const r = localStorage.getItem(STORE); if (r) { const s = JSON.parse(r); if (s && s.v === 6 && s.patients && s.patients.length) { s.patients.forEach(x => { normTbl(x); (x.meds || []).forEach(medTd); if (x.demo) { (x.meds || []).forEach(m => { if (m.name === 'Prednisolon') { m.name = 'Methylprednisolon (Medrol)'; m.dose = m.dose === '10 mg' ? '8 mg' : '4 mg'; } }); if (x.maint) x.maint = x.maint.replace('Prednisolon', 'Methylprednisolon'); } }); return s; } } } catch (e) { } return freshState(); }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); UI.noStore = false; return true; } catch (e) { if (!UI.noStore) { UI.noStore = true; storeBanner(); } return false; } }
+function storeBanner() {
+  if (document.getElementById('store-warn')) return;
+  const d = document.createElement('div'); d.id = 'store-warn'; d.className = 'alert crit'; d.setAttribute('role', 'alert'); d.style.margin = '8px 16px';
+  d.innerHTML = `<span class="ai" aria-hidden="true">${IC.crit}</span><div><p class="am">Trình xem này không cho lưu dữ liệu</p><p class="aa">Thay đổi vừa rồi chỉ còn đến khi đóng trang. Hãy mở sổ bằng trình duyệt (Chrome, Safari) trên điện thoại, hoặc xuất file sao lưu ngay.</p></div>`;
+  const m = document.querySelector('main') || document.body; m.parentNode.insertBefore(d, m);
+}
+const cur = () => S.patients.find(p => p.id === S.cur) || S.patients[0];
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => { t.hidden = true; }, 2600); }
+
+function contactHTML(p, strong) {
+  if (!p.drPhone) return `<div class="contact${strong ? ' strong' : ''}"><div><div class="flabel">Bác sĩ điều trị</div><p class="small">Chưa có số điện thoại bác sĩ điều trị. Thêm trong mục Hồ sơ.</p></div><button class="btn sm" type="button" data-go="profile">Thêm số BS</button></div>`;
+  const tel = p.drPhone.replace(/[^\d+]/g, '');
+  return `<div class="contact${strong ? ' strong' : ''}"><div style="min-width:0"><div class="flabel">${strong ? 'Liên hệ ngay bác sĩ điều trị' : 'Bác sĩ điều trị'}</div><b>${esc(p.drName || 'Bác sĩ điều trị')}</b><div class="phone">${esc(p.drPhone)}</div></div><div class="actions"><a class="btn primary" href="tel:${esc(tel)}">Gọi</a><button class="btn" type="button" data-copy="${esc(p.drPhone)}">Sao chép số</button></div></div>`;
+}
+/* Lịch nhắc dạng .ics (ứng dụng Lịch trên điện thoại tự báo) */
+const icsEsc = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+const icsDT = (d, t) => d.replace(/-/g, '') + (t ? 'T' + t.replace(':', '') + '00' : '');
+function buildICS(evs) {
+  const st = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//So Than Ghep//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH'];
+  evs.forEach((e, i) => {
+    L.push('BEGIN:VEVENT', `UID:${uid()}-${i}@sothanghep`, `DTSTAMP:${st}`);
+    if (e.time) L.push(`DTSTART:${icsDT(e.date, e.time)}`, 'DURATION:PT15M'); else L.push(`DTSTART;VALUE=DATE:${icsDT(e.date)}`, `DTEND;VALUE=DATE:${icsDT(addDays(e.date, 1))}`);
+    if (e.rrule) L.push('RRULE:' + e.rrule);
+    L.push('SUMMARY:' + icsEsc(e.title)); if (e.desc) L.push('DESCRIPTION:' + icsEsc(e.desc));
+    (e.alarms || ['PT0M']).forEach(a => L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(e.title), 'TRIGGER:' + a, 'END:VALARM'));
+    L.push('END:VEVENT');
+  });
+  L.push('END:VCALENDAR'); return L.join('\r\n');
+}
+/* Lưu file qua quyền "downloads" của trình xem (người xem xác nhận trước khi lưu) */
+async function saveFile(name, text) {
+  let dl = null; try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+  if (dl) { try { await dl.save({ filename: name, data: text }); return 'saved'; } catch (e) { return (e && e.code) || 'unavailable'; } }
+  if (!PWA) return 'unavailable';
+  const ext = (name.split('.').pop() || '').toLowerCase(), type = { json: 'application/json', ics: 'text/calendar', pdf: 'application/pdf' }[ext] || (text instanceof Blob && text.type) || 'application/octet-stream';
+  const blob = text instanceof Blob ? text : new Blob([text], { type });
+  try { const f = new File([blob], name, { type }); if (ext !== 'ics' && navigator.canShare && navigator.canShare({ files: [f] })) { await navigator.share({ files: [f], title: name }); return 'saved'; } } catch (e) { if (e && e.name === 'AbortError') return 'declined'; }
+  try { const u = URL.createObjectURL(blob), a = document.createElement('a'); a.href = u; a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(u); a.remove(); }, 4000); return 'saved'; } catch (e) { return 'unavailable'; }
+}
+/* ===== File đính kèm (PDF, ảnh) lưu trong IndexedDB trên chính máy ===== */
+const FDB = { db: null };
+function fdb() { if (FDB.db) return Promise.resolve(FDB.db); return new Promise((res, rej) => { try { const q = indexedDB.open('so-than-ghep-files', 1); q.onupgradeneeded = () => q.result.createObjectStore('files', { keyPath: 'id' }); q.onsuccess = () => { FDB.db = q.result; res(q.result); }; q.onerror = () => rej(q.error); } catch (e) { rej(e); } }); }
+async function fput(rec) { const db = await fdb(); return new Promise((res, rej) => { const t = db.transaction('files', 'readwrite'); t.objectStore('files').put(rec); t.oncomplete = () => res(); t.onerror = () => rej(t.error); }); }
+async function fget(id) { const db = await fdb(); return new Promise((res, rej) => { const q = db.transaction('files').objectStore('files').get(id); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
+async function fdel(id) { try { const db = await fdb(); db.transaction('files', 'readwrite').objectStore('files').delete(id); } catch (e) { } }
+async function fall() { try { const db = await fdb(); return await new Promise((res, rej) => { const q = db.transaction('files').objectStore('files').getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error); }); } catch (e) { return []; } }
+const b64of = blob => new Promise(res => { const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1] || ''); r.readAsDataURL(blob); });
+const blobOf = (b64, type) => { const s = atob(b64), u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return new Blob([u], { type }); };
+const fmtSize = n => n >= 1048576 ? fmtN(n / 1048576, 1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+async function showFile(id) {
+  let r = null; try { r = await fget(id); } catch (e) { r = null; }
+  if (!r) { toast('Không tìm thấy file trên máy này (có thể đã bị xoá hoặc chưa khôi phục từ file sao lưu).'); return; }
+  const url = URL.createObjectURL(r.blob), isImg = /^image\//.test(r.type);
+  openSheet(`<h2>${esc(r.name)}</h2><p class="small muted" style="margin-bottom:8px">${fmtSize(r.size)} · lưu ngày ${fmtD(r.date)}</p>
+    ${isImg ? `<img src="${url}" alt="${esc(r.name)}" style="width:100%;border-radius:10px">` : `<iframe src="${url}" title="${esc(r.name)}" style="width:100%;height:60vh;border:1px solid var(--line);border-radius:10px;background:#fff"></iframe><p class="small muted" style="margin-top:6px">Nếu điện thoại không hiện được nội dung PDF, bấm "Lưu về máy" để mở bằng ứng dụng đọc PDF.</p>`}
+    <div class="actions" style="margin-top:10px"><button class="btn primary" type="button" data-fsave="${esc(id)}">Lưu về máy</button><button class="btn" type="button" data-close>Đóng</button></div>`);
+}
+async function backupNow() {
+  const o = Object.assign({}, S, { pin: '' }), fs = await fall();
+  if (fs.length) o.files = await Promise.all(fs.map(async f => ({ id: f.id, name: f.name, type: f.type, size: f.size, date: f.date, data: await b64of(f.blob) })));
+  const r = await saveFile(`so-than-ghep-saoluu-${TODAY}.json`, JSON.stringify(o));
+  if (r === 'saved') { S.lastBackup = TODAY; save(); toast('Đã lưu file sao lưu'); if (UI.tab === 'home' || UI.tab === 'profile' || UI.tab === 'entry') render(); }
+  else toast(r === 'declined' ? 'Đã huỷ lưu file' : 'Trình xem này chưa cho phép lưu file');
+}
+/* Lần khám (không tính tự đo tại nhà) mới hơn lần sao lưu gần nhất */
+function backupDue(p) { const v = p.entries.filter(e => e.kind !== 'tainha').pop(); return v && v.date >= (S.lastBackup ? addDays(S.lastBackup, 1) : '0000') ? v : null; }
+function backupCard(p) {
+  const v = backupDue(p); if (!v) return '';
+  return `<div class="card"><div class="alert warn"><span class="ai" aria-hidden="true">${IC.warn}</span><div><p class="am">Sao lưu sau lần tái khám ${fmtD(v.date)}</p><p class="aa">${S.lastBackup ? 'Lần sao lưu gần nhất: ' + fmtD(S.lastBackup) + '.' : 'Chưa sao lưu lần nào.'} Dữ liệu chỉ nằm trên điện thoại này; mất máy hoặc xoá app sẽ mất hết. Lưu file sao lưu rồi gửi vào Zalo "Cloud của tôi" hoặc Google Drive.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-export>Sao lưu ngay</button></div></div></div></div>`;
+}
+function icsFor(p, what) {
+  if (what === 'meds') {
+    const by = {}; p.meds.forEach(m => m.times.forEach(t => { (by[t] = by[t] || []).push(m); }));
+    return Object.keys(by).sort().map(t => ({ date: TODAY, time: t, rrule: 'FREQ=DAILY', title: `Uống thuốc ${t}`, desc: by[t].map(m => `${m.name}: ${m.dose}`).join('\n') + '\nĐánh dấu đã uống trong Sổ Thận Ghép.', sub: by[t].map(m => m.name).join(', ') }));
+  }
+  if (what === 'appt') return p.nextAppt ? [{ date: p.nextAppt, title: 'Tái khám ghép thận', desc: (p.nextNote ? p.nextNote + '\n' : '') + 'Nhịn ăn sáng. Chưa uống tacrolimus buổi sáng cho đến khi lấy máu xong. Mang sổ khám và danh sách thuốc.', alarms: ['-PT5H', 'PT6H'], sub: 'Nhắc lúc 19:00 hôm trước và 06:00 sáng hôm khám' }] : [];
+  if (what.startsWith('vax:')) {
+    const v = VAX.find(x => x.k === what.slice(4)); if (!v) return [];
+    const d = p.nextAppt && p.nextAppt >= TODAY ? p.nextAppt : addDays(TODAY, 7);
+    return [{ date: d, title: `Hỏi BS về tiêm ${v.name}`, desc: v.sched, alarms: ['PT7H'], sub: `Nhắc lúc 07:00 ngày ${fmtD(d)}` }];
+  }
+  return [];
+}
+function openSheet(html) { $('#sheet-c').innerHTML = html; $('#sheet').hidden = false; const b = $('#sheet [data-close]'); if (b) b.focus(); }
+function closeSheet() { $('#sheet').hidden = true; }
+
+const IC = {
+  crit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5.5v9M12 19v.01"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5.5v9M12 19v.01"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 10.5v8M12 5.5v.01"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+};
+const LV = { crit: 'Cần liên hệ ngay', warn: 'Cần chú ý', info: 'Thông tin', ok: 'Ổn định' };
+const pill = (lv, text) => `<span class="pill ${lv}">${IC[lv] || ''}${esc(text || LV[lv])}</span>`;
+function alertHTML(a) {
+  return `<div class="alert ${a.lv}" role="${a.lv === 'crit' ? 'alert' : 'note'}"><span class="ai" aria-hidden="true">${IC[a.lv]}</span><div style="min-width:0">
+    <div class="at"><span class="lvl">${LV[a.lv]}</span>${a.date ? `<span class="ad">${fmtD(a.date)}</span>` : ''}</div>
+    <p class="am">${esc(a.title)}</p><p class="aa">${esc(a.act)}</p></div></div>`;
+}
+function armConfirm(btn, label) {
+  if (btn.dataset.armed) return true;
+  btn.dataset.armed = '1'; btn.dataset.orig = btn.textContent; btn.textContent = label || 'Bấm lần nữa để xác nhận';
+  setTimeout(() => { if (btn.isConnected && btn.dataset.armed) { delete btn.dataset.armed; btn.textContent = btn.dataset.orig; } }, 4000);
+  return false;
+}
+const dayLabel = d => d < 0 ? 'Chưa ghép' : `Ngày thứ ${d} sau ghép · tháng thứ ${Math.floor(d / 30.44) + 1}`;
+
+/* ================= Khung chung ================= */
+function renderSelect() {
+  const s = $('#pt-select');
+  s.innerHTML = S.patients.map(p => `<option value="${p.id}"${p.id === S.cur ? ' selected' : ''}>${esc(p.name || 'Người bệnh mới')}${p.hospitalId ? ' · ' + esc(p.hospitalId) : ''}</option>`).join('') + '<option value="__new">+ Thêm người bệnh mới</option>';
+}
+function setTab(t) {
+  UI.tab = t;
+  $$('.tab').forEach(s => { s.hidden = s.id !== 'tab-' + t; });
+  $$('.tabbar button').forEach(b => b.setAttribute('aria-current', b.dataset.tab === t ? 'page' : 'false'));
+  render(); window.scrollTo(0, 0);
+}
+function render() { ({ home: renderHome, entry: renderEntry, charts: renderCharts, meds: renderMeds, sched: renderSched, profile: renderProfile })[UI.tab](); }
+
+/* ================= Tổng quan ================= */
+function patientAlerts(p) {
+  const out = [], ad = adherence(p);
+  if (ad != null && ad < 95) out.push({ lv: 'warn', k: 'adh', title: `Tuân thủ uống thuốc 7 ngày qua: ${ad}%`, act: 'Mục tiêu là đủ 100% số liều, đúng giờ. Đặt báo thức và đánh dấu ngay sau khi uống.' });
+  p.meds.forEach(m => { const r = medIx(p, m); if (r && r.sev === 'crit') out.push({ lv: 'crit', k: 'ix', title: `Tương tác thuốc nguy hiểm: ${m.name}`, act: r.eff + ' ' + r.act }); });
+  if (p.nextAppt) {
+    const d = diffDays(TODAY, p.nextAppt);
+    if (d < 0 && !p.entries.some(e => e.date >= p.nextAppt)) out.push({ lv: 'warn', k: 'appt', title: `Đã quá ngày hẹn tái khám ${fmtD(p.nextAppt)}`, act: 'Liên hệ BS để đặt lại lịch tái khám.' });
+    else if (d >= 0 && d <= 3) out.push({ lv: 'info', k: 'appt', title: `Tái khám ${d === 0 ? 'hôm nay' : d === 1 ? 'ngày mai' : 'sau ' + d + ' ngày'} (${fmtD(p.nextAppt)})`, act: 'Nhịn ăn sáng; chưa uống tacrolimus buổi sáng cho đến khi lấy máu xong.' });
+  }
+  const due = VAX.filter(v => vaxStatus(p, v).s === 'due').length;
+  if (due) out.push({ lv: 'info', k: 'vax', title: `${due} mũi tiêm chủng đến hạn`, act: 'Xem mục Lịch › Tiêm chủng và hỏi BS khi tái khám.' });
+  return out;
+}
+function spark(vals) {
+  if (vals.length < 2) return '';
+  const w = 120, h = 30, lo = Math.min(...vals), hi = Math.max(...vals), r = hi - lo || 1;
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * (w - 4) + 2).toFixed(1)},${(h - 3 - (v - lo) / r * (h - 6)).toFixed(1)}`).join(' ');
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" style="stroke:var(--series)" stroke-width="2" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg>`;
+}
+/* Hướng dẫn cài lên màn hình chính (chỉ bản phát hành, khi chưa cài) */
+function installCard() {
+  if (!PWA) return '';
+  const inst = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone;
+  let x = false; try { x = localStorage.getItem('stg-install-x') === '1'; } catch (e) { }
+  if (inst || x) return '';
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  return `<div class="card"><div class="card-h"><h2>Cài sổ lên màn hình chính</h2><button class="btn sm" type="button" data-install-x>Để sau</button></div>
+    <p class="small">${ios ? 'Trên iPhone: mở bằng <b>Safari</b> → bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên) → chọn <b>Thêm vào MH chính</b>.' : 'Trên Android: mở bằng <b>Chrome</b> → bấm <b>⋮</b> góc trên → chọn <b>Thêm vào màn hình chính</b> (hoặc <b>Cài đặt ứng dụng</b>).'}</p>
+    <p class="small muted" style="margin-top:6px">Cài lên màn hình chính giúp mở nhanh, dùng được khi không có mạng và giữ dữ liệu an toàn hơn.</p></div>`;
+}
+function renderHome() {
+  const p = cur(), el = $('#tab-home'), E = p.entries, day = diffDays(p.txDate, TODAY);
+  const last = E[E.length - 1];
+  const lastWith = k => { for (let i = E.length - 1; i >= 0; i--) if (E[i][k] != null) return E[i]; return null; };
+  const ser = (k, f) => E.filter(e => e[k] != null).slice(-8).map(f || (e => e[k]));
+  const la = last ? entryAlerts(p, last) : [], pa = patientAlerts(p);
+
+  const tile = (label, e, val, unit, sub, lv, sp) => `<div class="tile"><div class="tl">${label}</div>
+     ${e ? `<div class="tv">${val}<small>${unit}</small></div><div class="ts">${sub}</div><div>${pill(lv)}</div>${sp}` : '<div class="ts">Chưa có số liệu</div>'}</div>`;
+  const eC = lastWith('cr'), eT = lastWith('tac'), eB = lastWith('sbp');
+  const tiles = [
+    tile('Creatinin', eC, eC && fmtN(eC.cr), 'µmol/L', eC ? `${fmtDs(eC.date)} · nền ${(crOf(p, eC) || {}).base ?? '—'}` : '', eC ? worst(entryAlerts(p, eC), ['cr']) : 'ok', spark(ser('cr'))),
+    tile('eGFR', eC, eC && fmtN(egfrOf(p, eC)), 'mL/ph/1,73m²', eC ? `${fmtDs(eC.date)} · CKD-EPI 2021` : '', eC ? worst(entryAlerts(p, eC), ['cr']) : 'ok', spark(ser('cr', e => egfrOf(p, e)))),
+    tile('Tacrolimus C0', eT, eT && fmtN(eT.tac, 1), 'ng/mL', eT ? `${fmtDs(eT.date)} · đích ${tgtTxt(tgtForEntry(p, eT, 'tac'))}` : '', eT ? worst(entryAlerts(p, eT), ['tac']) : 'ok', spark(ser('tac'))),
+    tile('Huyết áp', eB, eB && `${eB.sbp}/${eB.dbp}`, 'mmHg', eB ? `${fmtDs(eB.date)} · mục tiêu < 130/80` : '', eB ? worst(entryAlerts(p, eB), ['bp']) : 'ok', spark(ser('sbp')))
+  ].join('');
+
+  const all = [...la, ...pa];
+  const alertsBlock = all.length ? all.map(alertHTML).join('') : `<div class="ok-note">${IC.ok.replace('<svg', '<svg width="20" height="20"')}<span>Không có cảnh báo. Tiếp tục uống thuốc đúng giờ và tái khám đúng hẹn.</span></div>`;
+
+  const hist = E.slice(0, -1).reverse().flatMap(e => entryAlerts(p, e).filter(a => a.lv !== 'info')).slice(0, 12);
+
+  el.innerHTML = `
+  ${installCard()}${PWA && !DEMO && !cur().name ? `<div class="card"><div class="alert info"><span class="ai" aria-hidden="true">${IC.info || ''}</span><div><p class="am">Chào mừng đến với sổ theo dõi sau ghép thận</p><p class="aa">Bước đầu tiên: nhập hồ sơ (ngày ghép, ngày xuất viện, creatinin lúc xuất viện, phác đồ thuốc, số điện thoại BS điều trị). Nên làm cùng BS hoặc điều dưỡng trước khi xuất viện.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-go-edit>Nhập hồ sơ</button></div></div></div></div>` : ''}
+  <div class="card hero">
+    <div class="day-badge" aria-hidden="true"><b>${day >= 0 ? day : '–'}</b><span>ngày</span></div>
+    <div style="min-width:0"><h1>${esc(p.name || 'Người bệnh mới')}</h1>
+      <p class="muted small">${esc(p.hospitalId || 'Chưa có mã')} · ${dayLabel(day)}</p>
+      <div class="chips"><span class="chip">Ghép lần ${esc(p.txNumber)}</span>${p.preemptive === 'yes' ? '<span class="chip">Ghép đón đầu</span>' : ''}<span class="chip">${esc(p.donorType)}</span><span class="chip">${p.related === 'yes' ? 'Huyết thống' : 'Không huyết thống'}</span><span class="chip">Ghép ngày ${fmtD(p.txDate)}</span></div>
+    </div>
+  </div>
+
+  <div class="card"><div class="card-h"><h2>Cảnh báo hiện tại</h2>${last ? `<span class="muted small">Theo lần ghi ${fmtD(last.date)}</span>` : ''}</div><div class="stack">${alertsBlock}${all.some(a => a.lv === 'crit') ? contactHTML(p, true) : ''}</div>
+    ${hist.length ? `<details class="add" style="margin-top:12px"><summary>Cảnh báo các lần trước (${hist.length})</summary><div class="stack">${hist.map(alertHTML).join('')}</div></details>` : ''}
+  </div>
+
+  ${backupCard(p)}
+  <div class="tiles">${tiles}</div>
+  <div class="actions"><button class="btn primary" data-go="entry">Nhập kết quả mới</button><button class="btn" data-go="charts">Xem diễn tiến</button></div>
+
+  ${adviceCard(p)}
+  ${apptCard(p)}
+  ${doseCard(p)}
+  <div class="card">${contactHTML(p)}</div>`;
+
+  el.onclick = ev => {
+    const g = ev.target.closest('[data-go]'); if (g) setTab(g.dataset.go);
+    if (ev.target.closest('[data-go-edit]')) { UI.editProfile = true; setTab('profile'); }
+    if (ev.target.closest('[data-install-x]')) { try { localStorage.setItem('stg-install-x', '1'); } catch (e) { } renderHome(); }
+  };
+  el.onchange = ev => {
+    const c = ev.target.closest('input[data-dose]'); if (!c) return;
+    p.doses[TODAY] = p.doses[TODAY] || {}; p.doses[TODAY][c.dataset.dose] = c.checked; save();
+    c.closest('.dose').classList.toggle('done', c.checked);
+    if (c.checked) toast('Đã ghi nhận uống thuốc');
+  };
+}
+function adviceCard(p) {
+  const e = p.entries.slice().reverse().find(x => x.advice);
+  if (!e) return '';
+  return `<div class="card"><div class="card-h"><h2>Lời dặn của bác sĩ</h2><span class="muted small">Lần khám ${fmtD(e.date)}</span></div><p style="white-space:pre-line">${esc(e.advice)}</p></div>`;
+}
+function apptCard(p) {
+  if (!p.nextAppt) return `<div class="card"><h2>Lần tái khám tới</h2><p class="muted">Chưa có ngày hẹn. Thêm ngày hẹn BS ghi trong mục Hồ sơ.</p></div>`;
+  const d = pd(p.nextAppt), n = diffDays(TODAY, p.nextAppt);
+  return `<div class="card"><h2>Lần tái khám tới</h2>
+   <div class="appt"><div class="cal" aria-hidden="true"><div class="m">Th ${d.getMonth() + 1}</div><div class="d">${d.getDate()}</div></div>
+   <div><b>${WD[d.getDay()]}, ${fmtD(p.nextAppt)}</b> · <span class="${n < 0 ? 'muted' : ''}">${n === 0 ? 'hôm nay' : n > 0 ? 'còn ' + n + ' ngày' : 'đã qua ' + (-n) + ' ngày'}</span>
+   ${p.nextNote ? `<p class="small" style="margin-top:4px">${esc(p.nextNote)}</p>` : ''}</div></div>
+   <ul class="prep"><li>Nhịn ăn sáng; <b>chưa uống tacrolimus</b> buổi sáng cho đến khi lấy máu xong (để đo đúng nồng độ đáy).</li><li>Ghi lại giờ uống liều tacrolimus gần nhất.</li><li>Mang sổ khám, kết quả cũ, danh sách thuốc đang dùng.</li></ul>
+   <div class="actions" style="margin-top:12px"><button class="btn" type="button" data-ics="appt">Thêm vào lịch điện thoại</button></div></div>`;
+}
+function doseCard(p) {
+  if (!p.meds.length) return `<div class="card"><h2>Thuốc hôm nay</h2><p class="muted">Chưa có thuốc. Thêm thuốc trong mục Thuốc.</p></div>`;
+  const log = p.doses[TODAY] || {}, by = {};
+  p.meds.forEach(m => m.times.forEach(t => { (by[t] = by[t] || []).push(m); }));
+  const ad = adherence(p);
+  const groups = Object.keys(by).sort().map(t => `<div class="dose-grp"><h3>${t}</h3>${by[t].map(m => {
+    const k = m.id + '@' + t, on = !!log[k], id = 'd-' + m.id + '-' + t.replace(':', '');
+    return `<label class="dose${on ? ' done' : ''}" for="${id}"><input type="checkbox" id="${id}" data-dose="${k}"${on ? ' checked' : ''}><span><span class="dn">${esc(m.name)}</span><br><span class="dd">${esc(m.td && m.td[t] != null ? mg(m.td[t]) + ' ' + (m.unit || 'mg') : m.dose)}</span></span></label>`;
+  }).join('')}</div>`).join('');
+  return `<div class="card"><div class="card-h"><h2>Thuốc hôm nay</h2><span class="muted small">${WD[new Date().getDay()]}, ${fmtD(TODAY)}</span></div>
+    ${ad != null ? `<div class="adh" style="margin-bottom:12px"><span class="small">Tuân thủ 7 ngày</span><div class="bar" role="img" aria-label="Tuân thủ ${ad}%"><i style="width:${ad}%"></i></div><b class="num">${ad}%</b></div>` : ''}
+    <div class="stack">${groups}</div>
+    <div class="actions" style="margin-top:12px"><button class="btn" type="button" data-ics="meds">Đặt báo thức uống thuốc</button></div>
+    <p class="muted small" style="margin-top:6px">Tạo lịch nhắc lặp lại mỗi ngày trong ứng dụng Lịch của điện thoại, báo đúng giờ kể cả khi không mở sổ.</p></div>`;
+}
+
+/* ================= Nhập kết quả ================= */
+const NUMF = [
+  { k: 'hr', id: 'e-hr', lab: 'Mạch', unit: 'lần/phút', min: 30, max: 200, step: 1 },
+  { k: 'sbp', id: 'e-sbp', lab: 'HA tâm thu', unit: 'mmHg', min: 60, max: 260, step: 1 },
+  { k: 'dbp', id: 'e-dbp', lab: 'HA tâm trương', unit: 'mmHg', min: 30, max: 160, step: 1 },
+  { k: 'wt', id: 'e-wt', lab: 'Cân nặng', unit: 'kg', min: 25, max: 200, step: 0.1 },
+  { k: 'temp', id: 'e-temp', lab: 'Nhiệt độ', unit: '°C', min: 34, max: 42.5, step: 0.1 },
+  { k: 'tac', id: 'e-tac', lab: 'Nồng độ tacrolimus (FK) C0', unit: 'ng/mL', min: 0.5, max: 60, step: 0.1 },
+  { k: 'prot', id: 'e-prot', lab: 'Đạm niệu 24 giờ', unit: 'g/24 giờ', min: 0, max: 30, step: 0.01 },
+  { k: 'hba1c', id: 'e-hba1c', lab: 'HbA1c', unit: '%', min: 3, max: 20, step: 0.1 },
+  { k: 'cmv', id: 'e-cmv', lab: 'CMV DNA máu (PCR)', unit: 'copies/mL', min: 0, max: 1e9, step: 1 },
+  { k: 'bkv', id: 'e-bkv', lab: 'BKV DNA máu (PCR)', unit: 'copies/mL', min: 0, max: 1e10, step: 1 },
+  { k: 'tdAM', id: 'e-tdam', lab: 'Liều sáng', unit: 'mg', min: 0, max: 30, step: 0.25 },
+  { k: 'tdPM', id: 'e-tdpm', lab: 'Liều tối', unit: 'mg', min: 0, max: 30, step: 0.25 },
+  { k: 'evr', id: 'e-evr', lab: 'Nồng độ everolimus C0', unit: 'ng/mL', min: 0.5, max: 40, step: 0.1 },
+  { k: 'edAM', id: 'e-edam', lab: 'Liều sáng', unit: 'mg', min: 0, max: 10, step: 0.25 },
+  { k: 'edPM', id: 'e-edpm', lab: 'Liều tối', unit: 'mg', min: 0, max: 10, step: 0.25 }
+];
+const numInput = (f, val, ph) => `<div class="field" id="w-${f.id}"><label for="${f.id}">${f.lab} <span class="muted">(${f.unit})</span></label><input id="${f.id}" type="number" inputmode="decimal" step="${f.step}" min="${f.min}" max="${f.max}"${has(val) ? ` value="${val}"` : ''}${ph ? ` placeholder="${esc(ph)}"` : ''}><small class="err" hidden></small></div>`;
+function lastDose(p, kind) {
+  const [a, b] = DOSEK[kind]; let e = null; for (let i = p.entries.length - 1; i >= 0; i--) { const x = p.entries[i]; if (has(x[a]) || has(x[b])) { e = x; break; } }
+  const m = p.meds.find(x => x.cls === ({ tac: 'tac', evr: 'mtor' })[kind]);
+  if (m && m.td && m.doseDate && (!e || m.doseDate > e.date)) { const ts = m.times.filter(t => m.td[t] != null); if (ts.length === 1) return [m.td[ts[0]], null]; if (ts.length === 2) return [m.td[ts[0]], m.td[ts[1]]]; }
+  return e ? [e[a], e[b]] : [null, null];
+}
+const nf = id => NUMF.find(f => f.id === id);
+function drugFieldset(p, kind) {
+  const T = kind === 'tac', once = (T && p.tacOnce === 'yes') || kind === 'srl', [a, b] = lastDose(p, kind), cur = tgtTxt(tgtOnDate(p, TODAY, kind));
+  const ids = { tac: ['e-tac', 'e-tdam', 'e-tdpm', 'e-tg'], evr: ['e-evr', 'e-edam', 'e-edpm', 'e-eg'] }[kind];
+  const am = Object.assign({}, nf(ids[1]), once ? { lab: T ? 'Liều 1 lần/ngày (sáng)' : 'Liều mỗi ngày' } : {});
+  return `<fieldset><legend>${T ? 'Tacrolimus (FK)' : DRUG[kind]}</legend>
+    <div class="grid2">${numInput(nf(ids[0]))}<div class="field"><span class="flabel">Khung đích hiện tại</span><p style="padding:10px 0 0;font-weight:700">${cur}${cur.startsWith('theo') ? '' : ' ng/mL'}</p><small>${esc(REGIMENS[regOn(p, TODAY)])} · sửa khung trong Hồ sơ</small></div></div>
+    <p class="small muted">Liều theo đơn BS lần này (app điền sẵn liều đang uống; sửa nếu BS chỉnh liều).</p>
+    <div class="grid2">${numInput(am, a)}${once ? `<input type="hidden" id="${ids[2]}" value="">` : numInput(nf(ids[2]), b)}</div>
+  </fieldset>`;
+}
+function renderEntry() {
+  const p = cur(), el = $('#tab-entry');
+  let res = '';
+  if (UI.saved && UI.saved.pid === p.id) {
+    const e = p.entries.find(x => x.id === UI.saved.id);
+    if (e) {
+      const al = entryAlerts(p, e), g = egfrOf(p, e);
+      res = `<div class="card" id="saved-card" tabindex="-1"><div class="card-h"><h2>Đã lưu kết quả ngày ${fmtD(e.date)}</h2>${pill(worst(al))}</div>
+        ${g ? `<p style="margin-bottom:10px">eGFR tính được: <b class="num">${g}</b> mL/phút/1,73 m² (CKD-EPI 2021)</p>` : ''}
+        <div class="stack">${al.length ? al.map(alertHTML).join('') : `<div class="ok-note">${IC.ok.replace('<svg', '<svg width="20" height="20"')}<span>Các chỉ số nằm trong ngưỡng theo dõi.</span></div>`}${al.some(a => a.lv === 'crit') ? contactHTML(p, true) : ''}</div>
+        ${e.kind !== 'tainha' && backupDue(p) ? `<div class="alert warn" style="margin-top:12px"><span class="ai" aria-hidden="true">${IC.warn}</span><div><p class="am">Sao lưu dữ liệu sau lần khám này</p><p class="aa">Mỗi lần tái khám, sao lưu một lần để không mất dữ liệu khi đổi hoặc mất điện thoại.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-export>Sao lưu ngay</button></div></div></div>` : ''}
+        <div class="actions" style="margin-top:12px"><button class="btn primary" data-go="charts">Xem diễn tiến</button><button class="btn" data-go="home">Về tổng quan</button></div></div>`;
+    }
+  }
+  el.innerHTML = `<div class="page-h"><h1>Nhập kết quả</h1><p>Ghi số đo tại nhà, kết quả tái khám hoặc khi có bất thường. Chỉ cần điền mục có số liệu; app tự tính eGFR và kiểm tra cảnh báo.</p></div>
+  ${res}
+  <form id="f-entry" class="card form" novalidate>
+    <fieldset><legend>Lần ghi</legend><div class="grid2">
+      <div class="field"><label for="e-date">Ngày</label><input id="e-date" type="date" value="${TODAY}" max="${TODAY}" required><small class="err" hidden></small></div>
+      <div class="field"><label for="e-kind">Loại</label><select id="e-kind"><option value="dinhky">Tái khám định kỳ</option><option value="batthuong">Khi có bất thường</option><option value="tainha">Tự đo tại nhà</option></select></div>
+    </div></fieldset>
+    <fieldset><legend>Xét nghiệm</legend>
+      <div class="grid2">
+        <div class="field" id="w-e-cr"><label for="e-cr">Creatinin máu</label><div class="unit"><input id="e-cr" type="number" inputmode="decimal" step="0.01"><select id="e-cru" aria-label="Đơn vị creatinin"><option value="umol">µmol/L</option><option value="mgdl">mg/dL</option></select></div><small class="err" hidden></small></div>
+        <div class="field"><label for="e-egfr">eGFR (tự tính)</label><input id="e-egfr" readonly value="—" aria-describedby="egfr-h"><small id="egfr-h">CKD-EPI 2021 theo tuổi, giới, creatinin</small></div>
+        ${numInput(nf('e-prot'))}
+        <div class="field" id="w-e-glu"><label for="e-glu">Glucose máu</label><div class="unit"><input id="e-glu" type="number" inputmode="decimal" step="0.1"><select id="e-gluu" aria-label="Đơn vị glucose"><option value="mmol">mmol/L</option><option value="mgdl">mg/dL</option></select></div><small class="err" hidden></small></div>
+        <div class="field"><label for="e-glut">Thời điểm đo glucose</label><select id="e-glut"><option value="doi">Lúc đói (≥ 8 giờ)</option><option value="batky">Bất kỳ / sau ăn</option></select></div>
+        ${numInput(nf('e-hba1c'), null, p.dm && p.dm !== 'no' ? 'Mỗi 3 tháng' : 'Khi BS chỉ định')}
+      </div>
+    </fieldset>
+    <fieldset><legend>Virus (khi BS chỉ định)</legend>
+      <div class="grid2">${numInput(nf('e-cmv'))}${numInput(nf('e-bkv'))}</div>
+      <p class="small muted">Nhập 0 nếu kết quả âm tính hoặc "không phát hiện". Ghi đúng đơn vị trên phiếu xét nghiệm.</p>
+    </fieldset>
+    ${[['tac', usesTac(p)], ['evr', usesEvr(p)]].map(([k, on]) => on ? drugFieldset(p, k) : `<details class="add"><summary>${DRUG[k]} (nếu đang dùng)</summary>${drugFieldset(p, k)}</details>`).join('')}
+    <fieldset><legend>Huyết áp và cân nặng</legend><div class="grid3">${['e-sbp', 'e-dbp', 'e-wt'].map(i => numInput(nf(i))).join('')}</div></fieldset>
+    <fieldset><legend>Triệu chứng (nếu có)</legend>
+      <div class="checks">${SYM.filter(s => CORE_SYM.includes(s[0])).map(s => `<label class="ck" for="s-${s[0]}"><input type="checkbox" id="s-${s[0]}" value="${s[0]}"><span>${s[1]}</span></label>`).join('')}</div>
+      <details class="add"><summary>Triệu chứng khác</summary><div class="checks">${SYM.filter(s => !CORE_SYM.includes(s[0])).map(s => `<label class="ck" for="s-${s[0]}"><input type="checkbox" id="s-${s[0]}" value="${s[0]}"><span>${s[1]}</span></label>`).join('')}</div></details>
+    </fieldset>
+    <details class="add"><summary>Thêm chỉ số (không bắt buộc)</summary><div class="grid2">
+      ${numInput(nf('e-hr'))}${numInput(nf('e-temp'))}
+      <div class="field"><label for="e-doset">Giờ uống liều tacrolimus trước đó</label><input id="e-doset" type="time"><small>${p.tacOnce === 'yes' ? 'Dạng 1 lần/ngày: thường là sáng hôm trước' : 'Thường là liều tối hôm trước'}</small></div>
+      <div class="field"><label for="e-drawt">Giờ lấy máu</label><input id="e-drawt" type="time"><small>Dùng để kiểm tra đúng nồng độ đáy (C0)</small></div>
+    </div></details>
+    <fieldset><legend>Dặn dò của bác sĩ lần này</legend>
+      <div class="field"><label for="e-advice">Lời dặn của bác sĩ</label><textarea id="e-advice" rows="3" placeholder="Ví dụ: giữ nguyên liều; thử lại FK sau 5 ngày; ăn giảm muối"></textarea><small>Chép lại lời dặn trong sổ khám hoặc đơn thuốc để không quên.</small></div>
+      <div class="grid2"><div class="field"><label for="e-next">Ngày hẹn tái khám tiếp theo</label><input id="e-next" type="date" min="${TODAY}"><small>Lịch hẹn sẽ được cập nhật trong mục Lịch.</small></div>
+        <div class="field" id="w-e-crbase"><label for="e-crbase">Creatinin nền mới do BS đặt <span class="muted">(µmol/L)</span></label><input id="e-crbase" type="number" inputmode="decimal" min="20" max="1500" step="1" placeholder="Chỉ ghi khi BS dặn"><small>Ví dụ sau đợt thải ghép đã ổn định. App so sánh với số này từ lần khám này trở đi.</small><small class="err" hidden></small></div></div>
+    </fieldset>
+    <div class="grid2">
+      <div class="field"><label for="e-note">Ghi chú của người bệnh</label><textarea id="e-note" rows="2" placeholder="Ví dụ: quên uống thuốc tối hôm qua"></textarea></div>
+      <div class="field"><label for="e-photo">Ảnh phiếu xét nghiệm (tuỳ chọn)</label><input id="e-photo" type="file" accept="image/*"><small>Bản mẫu chỉ ghi tên tệp, chưa lưu ảnh.</small></div>
+    </div>
+    <p class="err small" id="e-form-err" style="color:var(--crit);font-weight:600" hidden></p>
+    <div class="actions"><button class="btn primary" type="submit">Lưu kết quả</button><button class="btn" type="reset">Xoá form</button></div>
+  </form>`;
+
+  const f = $('#f-entry');
+  const crU = () => { const v = parseFloat($('#e-cr').value); if (!isFinite(v)) return null; return $('#e-cru').value === 'mgdl' ? Math.round(v * 88.4) : Math.round(v); };
+  const upd = () => { const c = crU(), d = $('#e-date').value || TODAY; const g = c ? egfr(c, p.sex, ageAt(p.dob, d)) : null; $('#e-egfr').value = g ? `${g} mL/ph/1,73 m²` : '—'; };
+  f.oninput = upd; f.onchange = upd;
+  el.onclick = ev => { const g = ev.target.closest('[data-go]'); if (g) { UI.saved = null; setTab(g.dataset.go); } };
+  f.onsubmit = ev => {
+    ev.preventDefault();
+    $$('.field', f).forEach(w => { w.classList.remove('bad'); const s = $('.err', w); if (s) { s.hidden = true; s.textContent = ''; } });
+    $('#e-form-err').hidden = true;
+    let bad = null; const err = (wid, msg) => { const w = $('#w-' + wid) || $('#' + wid).closest('.field'); w.classList.add('bad'); const s = $('.err', w); s.textContent = msg; s.hidden = false; bad = bad || $('#' + wid); };
+    const e = { id: uid(), date: $('#e-date').value, kind: $('#e-kind').value, gluType: $('#e-glut').value, doseT: $('#e-doset').value || '', drawT: $('#e-drawt').value || '', note: $('#e-note').value.trim(), advice: $('#e-advice').value.trim(), crBase: null, sym: $$('.checks input:checked', f).map(i => i.value) };
+    if (!e.date) err('e-date', 'Chọn ngày ghi.'); else if (e.date > TODAY) err('e-date', 'Ngày không được sau hôm nay.');
+    NUMF.forEach(fd => { const raw = $('#' + fd.id).value; if (raw === '') { e[fd.k] = null; return; } const v = parseFloat(raw); if (!isFinite(v) || v < fd.min || v > fd.max) err(fd.id, `Ngoài khoảng hợp lệ ${fmtN(fd.min, fd.step < 1 ? 1 : 0)}–${fmtN(fd.max)} ${fd.unit}. Kiểm tra lại số hoặc đơn vị.`); else e[fd.k] = v; });
+    const c = $('#e-cr').value; if (c === '') e.cr = null; else { const v = crU(); if (!v || v < 20 || v > 2000) err('e-cr', 'Ngoài khoảng hợp lệ (20–2000 µmol/L hoặc 0,23–22,6 mg/dL). Kiểm tra lại đơn vị.'); else e.cr = v; }
+    const gl = $('#e-glu').value; if (gl === '') e.glu = null; else { let v = parseFloat(gl); if ($('#e-gluu').value === 'mgdl') v = v / 18; v = +v.toFixed(1); if (!(v >= 1 && v <= 40)) err('e-glu', 'Ngoài khoảng hợp lệ (1–40 mmol/L hoặc 18–720 mg/dL).'); else e.glu = v; }
+    const cb = $('#e-crbase').value; if (cb !== '') { const v = Math.round(parseFloat(cb)); if (!(v >= 20 && v <= 1500)) err('e-crbase', 'Creatinin nền cần trong khoảng 20–1500 µmol/L.'); else e.crBase = v; }
+    const ph = $('#e-photo').files[0]; if (ph) e.photo = ph.name;
+    [['tgLo', 'tgHi', 'e-tg'], ['egLo', 'egHi', 'e-eg']].forEach(([l, h, id]) => { const el = $('#' + id); if (!el) return; const v = parseRange(el.value); if (v === 'err') err(id, 'Ghi theo dạng 6-8: số nhỏ trước, số lớn sau.'); else if (v) { e[l] = v[0]; e[h] = v[1]; } });
+    const hasData = ['hr', 'sbp', 'dbp', 'wt', 'temp', 'tac', 'prot', 'cr', 'glu', 'evr', 'srl', 'tgLo', 'egLo', 'sgLo', 'hba1c', 'cmv', 'bkv', 'crBase'].some(k => e[k] != null) || e.sym.length || e.note || e.advice || $('#e-next').value;
+    if (!bad && !hasData) { $('#e-form-err').textContent = 'Chưa có số liệu nào. Hãy nhập ít nhất một chỉ số, triệu chứng hoặc ghi chú.'; $('#e-form-err').hidden = false; return; }
+    if (bad) { bad.focus(); return; }
+    const before = { tac: lastDose(p, 'tac'), evr: lastDose(p, 'evr'), srl: lastDose(p, 'srl') };
+    p.entries.push(e); p.entries.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+    let medUpd = false; const nx = $('#e-next').value;
+    if (nx) { p.nextAppt = nx; p.nextNote = e.advice || ''; }
+    [['tac', 'tac'], ['evr', 'mtor'], ['srl', 'srl']].forEach(([kind, cls]) => { const [a, b] = DOSEK[kind]; if (!has(e[a]) && !has(e[b])) return; const o = before[kind]; if (dTot(o[0], o[1]) === dTot(e[a], e[b]) && +o[0] === +e[a]) return; const m = p.meds.find(x => x.cls === cls); if (m) { (m.hist = m.hist || []).push({ date: e.date, dose: doseText(m) }); m.dose = fmtDose(e[a], e[b]); const ts = m.times.slice().sort(); if (has(e[b]) && +e[b] > 0 && ts.length === 2) m.td = { [ts[0]]: +e[a] || 0, [ts[1]]: +e[b] }; else if (ts.length === 1) m.td = { [ts[0]]: dTot(e[a], e[b]) }; else m.td = null; m.unit = 'mg'; m.doseDate = e.date; medUpd = true; } });
+    save();
+    UI.saved = { pid: p.id, id: e.id }; toast(medUpd ? 'Đã lưu. Liều thuốc trong danh sách đã được cập nhật.' : `Đã lưu kết quả ngày ${fmtD(e.date)}`);
+    renderEntry(); window.scrollTo(0, 0); const sc = $('#saved-card'); if (sc) sc.focus({ preventScroll: true });
+  };
+}
+
+/* ================= Biểu đồ ================= */
+function niceTicks(lo, hi, n) {
+  const span = hi - lo || 1, raw = span / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+  const step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+  const a = Math.floor(lo / step) * step, b = Math.ceil(hi / step) * step, out = [];
+  for (let v = a; v <= b + step / 2; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+function xTicks(X0, X1) {
+  const a = new Date(X0), b = new Date(X1), months = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+  const st = months <= 7 ? 1 : months <= 14 ? 2 : months <= 26 ? 3 : months <= 50 ? 6 : 12;
+  const out = []; let d = new Date(a.getFullYear(), a.getMonth() + 1, 1, 12);
+  while (+d <= X1) { if (d.getMonth() % st === 0 || st === 1) out.push({ t: +d, l: `${pad2(d.getMonth() + 1)}/${String(d.getFullYear()).slice(2)}` }); d = new Date(d.getFullYear(), d.getMonth() + 1, 1, 12); }
+  return out;
+}
+function drawChart(host, cfg) {
+  const W = Math.max(280, Math.floor(host.clientWidth)), H = cfg.h || 196, M = { l: 44, r: 18, t: 20, b: 26 };
+  const X0 = +pd(cfg.x0), X1 = +pd(cfg.x1);
+  const sx = t => M.l + (t - X0) / (X1 - X0) * (W - M.l - M.r);
+  const series = cfg.series.map(s => ({ ...s, pts: s.pts.filter(q => q.v != null && isFinite(q.v)).map(q => ({ ...q, t: +pd(q.x) })).filter(q => q.t >= X0 && q.t <= X1) }));
+  const vals = series.flatMap(s => s.pts.map(q => q.v));
+  if (!vals.length) { host.innerHTML = '<p class="empty-s">Chưa có số liệu trong khoảng thời gian này.</p>'; return; }
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  (cfg.refs || []).forEach(r => { lo = Math.min(lo, r.y); hi = Math.max(hi, r.y); });
+  (cfg.bands || []).forEach(b => { if (+pd(b.x1) >= X0 && +pd(b.x0) <= X1) { lo = Math.min(lo, b.y0); hi = Math.max(hi, b.y1); } });
+  const padv = (hi - lo) * 0.08 || 1;
+  const ticks = niceTicks(cfg.zero ? 0 : lo - padv, hi + padv, 4), Y0 = ticks[0], Y1 = ticks[ticks.length - 1];
+  const sy = v => M.t + (1 - (v - Y0) / (Y1 - Y0)) * (H - M.t - M.b);
+  const dg = cfg.tickDigits != null ? cfg.tickDigits : (ticks[1] - ticks[0] < 1 ? (ticks[1] - ticks[0] < 0.1 ? 2 : 1) : 0);
+  let g = '';
+  ticks.forEach(v => { const y = sy(v).toFixed(1); g += `<line class="grid" x1="${M.l}" x2="${W - M.r}" y1="${y}" y2="${y}"/><text x="${M.l - 7}" y="${+y + 4}" text-anchor="end">${fmtN(v, dg)}</text>`; });
+  xTicks(X0, X1).forEach(t => { const x = sx(t.t); if (x < M.l + 14 || x > W - M.r - 10) return; g += `<line class="xt" x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${H - M.b}" y2="${H - M.b + 4}"/><text x="${x.toFixed(1)}" y="${H - 7}" text-anchor="middle">${t.l}</text>`; });
+  (cfg.bands || []).forEach(b => { const a = Math.max(X0, +pd(b.x0)), c = Math.min(X1, +pd(b.x1)); if (c <= a) return; g += `<rect class="band" x="${sx(a).toFixed(1)}" y="${sy(b.y1).toFixed(1)}" width="${(sx(c) - sx(a)).toFixed(1)}" height="${(sy(b.y0) - sy(b.y1)).toFixed(1)}"/>`; });
+  (cfg.events || []).forEach(ev => {
+    const a = +pd(ev.date); if (ev.kind === 'hosp') {
+      const b = +pd(ev.end || ev.date); if (b < X0 || a > X1) return; const x0 = sx(Math.max(X0, a)), x1 = Math.max(sx(Math.min(X1, b)), x0 + 4);
+      g += `<rect class="hosp" x="${x0.toFixed(1)}" y="${M.t}" width="${(x1 - x0).toFixed(1)}" height="${H - M.t - M.b}"/><text class="evl h" x="${x0.toFixed(1)}" y="${M.t - 6}">NV</text>`;
+    } else { if (a < X0 || a > X1) return; const x = sx(a).toFixed(1); g += `<line class="bx" x1="${x}" x2="${x}" y1="${M.t}" y2="${H - M.b}"/><text class="evl" x="${x}" y="${M.t - 6}" text-anchor="middle">S</text>`; }
+  });
+  (cfg.refs || []).forEach(r => { const y = sy(r.y).toFixed(1); g += `<line class="ref ${r.tone || ''}" x1="${M.l}" x2="${W - M.r}" y1="${y}" y2="${y}"/><text class="rl ${r.tone || ''}" x="${M.l + 6}" y="${+y - 5}">${esc(r.label)}</text>`; });
+  series.forEach(s => {
+    if (!s.pts.length) return;
+    const d = s.pts.map((q, i) => (i ? (cfg.step ? 'L' + sx(q.t).toFixed(1) + ' ' + sy(s.pts[i - 1].v).toFixed(1) + 'L' : 'L') : 'M') + sx(q.t).toFixed(1) + ' ' + sy(q.v).toFixed(1)).join('');
+    if (series.length === 1 && s.pts.length > 1) g += `<path class="area" style="fill:${s.color}" d="${d}L${sx(s.pts[s.pts.length - 1].t).toFixed(1)} ${H - M.b}L${sx(s.pts[0].t).toFixed(1)} ${H - M.b}Z"/>`;
+    g += `<path class="line" style="stroke:${s.color}" d="${d}"/>`;
+    s.pts.forEach((q, i) => { const st = cfg.status ? cfg.status(q, s) : 'ok', lastp = i === s.pts.length - 1; const r = st !== 'ok' || lastp ? 4.5 : 3; const fill = st === 'crit' ? 'var(--crit)' : st === 'warn' ? 'var(--warn)' : s.color; g += `<circle class="pt" cx="${sx(q.t).toFixed(1)}" cy="${sy(q.v).toFixed(1)}" r="${r}" style="fill:${fill}"/>`; });
+    const lp = s.pts[s.pts.length - 1], lx = sx(lp.t), ly = sy(lp.v), end = lx > W - 70;
+    g += `<text class="endl" x="${(end ? lx - 9 : lx + 9).toFixed(1)}" y="${(ly + (s.labelBelow ? 16 : -9)).toFixed(1)}" text-anchor="${end ? 'end' : 'start'}">${fmtN(lp.v, cfg.digits || 0)}</text>`;
+  });
+  g += `<line class="cross" x1="0" x2="0" y1="${M.t}" y2="${H - M.b}" visibility="hidden"/><g class="hls"></g><rect class="hit" x="${M.l}" y="${M.t}" width="${W - M.l - M.r}" height="${H - M.t - M.b}"/>`;
+  host.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" tabindex="0" aria-label="${esc(cfg.aria)}">${g}</svg><div class="tip" hidden></div>`;
+
+  const svg = $('svg', host), tip = $('.tip', host), cross = $('.cross', svg), hls = $('.hls', svg);
+  const times = [...new Set(series.flatMap(s => s.pts.map(q => q.t)))].sort((a, b) => a - b);
+  let idx = -1;
+  const show = i => {
+    idx = Math.max(0, Math.min(times.length - 1, i)); const t = times[idx], x = sx(t);
+    cross.setAttribute('x1', x); cross.setAttribute('x2', x); cross.setAttribute('visibility', 'visible');
+    tip.textContent = ''; hls.innerHTML = '';
+    const iso0 = iso(new Date(t)), dd = document.createElement('div'); dd.className = 'tdate';
+    dd.textContent = `${fmtD(iso0)} · ngày ${diffDays(cfg.txDate, iso0)} sau ghép`; tip.appendChild(dd);
+    let stTxt = null;
+    series.forEach(s => {
+      const q = s.pts.find(z => z.t === t); if (!q) return;
+      const row = document.createElement('div'); row.className = 'trow';
+      const k = document.createElement('i'); k.style.borderColor = s.color; row.appendChild(k);
+      const b = document.createElement('b'); b.textContent = fmtN(q.v, cfg.digits || 0); row.appendChild(b);
+      const u = document.createElement('span'); u.textContent = (series.length > 1 ? s.label + ' · ' : '') + cfg.unit; u.className = 'muted'; row.appendChild(u);
+      tip.appendChild(row);
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); c.setAttribute('class', 'hl'); c.setAttribute('cx', x); c.setAttribute('cy', sy(q.v)); c.setAttribute('r', 6); c.style.stroke = s.color; hls.appendChild(c);
+      const st = cfg.status ? cfg.status(q, s) : 'ok'; if (st !== 'ok' && cfg.statusText) stTxt = [st, cfg.statusText(q, s)];
+    });
+    if (stTxt) { const z = document.createElement('div'); z.className = 'tst ' + stTxt[0]; z.textContent = (stTxt[0] === 'crit' ? '▲ ' : '● ') + stTxt[1]; tip.appendChild(z); }
+    tip.hidden = false; const tw = tip.offsetWidth; let left = x + 14; if (left + tw > W) left = x - tw - 14; tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '4px';
+  };
+  const hide = () => { cross.setAttribute('visibility', 'hidden'); tip.hidden = true; hls.innerHTML = ''; };
+  const near = px => { let b = 0, bd = Infinity; times.forEach((t, i) => { const d = Math.abs(sx(t) - px); if (d < bd) { bd = d; b = i; } }); return b; };
+  svg.addEventListener('pointermove', e => { const r = svg.getBoundingClientRect(); show(near((e.clientX - r.left) * (W / r.width))); });
+  svg.addEventListener('pointerdown', e => { const r = svg.getBoundingClientRect(); show(near((e.clientX - r.left) * (W / r.width))); });
+  svg.addEventListener('pointerleave', hide);
+  svg.addEventListener('focus', () => show(times.length - 1));
+  svg.addEventListener('blur', hide);
+  svg.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { show(idx - 1); e.preventDefault(); } else if (e.key === 'ArrowRight') { show(idx + 1); e.preventDefault(); } else if (e.key === 'Escape') hide(); });
+}
+
+/* Vùng khung đích theo thời gian: dò từng ngày, gộp các đoạn liền nhau cùng khung */
+function bandsFor(p, kind) {
+  const E = p.entries; if (!E.length) return [];
+  let start = addDays(p.txDate, -30);
+  if (kind !== 'tac') { const [a] = DOSEK[kind], [l] = TGK[kind], f = E.find(x => has(x[kind]) || has(x[a]) || has(x[l])); if (!f) return []; start = f.date; }
+  const end = addDays(E[E.length - 1].date, 60), out = [];
+  for (let d = start; d <= end; d = addDays(d, 1)) {
+    const t = tgtOnDate(p, d, kind), l = out[out.length - 1];
+    if (!t) { if (l) l.closed = true; continue; }
+    if (l && !l.closed && l.y0 === t[0] && l.y1 === t[1]) l.x1 = addDays(d, 1); else out.push({ x0: d, x1: addDays(d, 1), y0: t[0], y1: t[1] });
+  }
+  return out;
+}
+function chartDefs(p) {
+  const E = p.entries, pts = (k, f) => E.filter(e => (f ? f(e) : e[k]) != null).map(e => ({ x: e.date, v: f ? f(e) : e[k], e }));
+  const ev = [...p.events.filter(x => x.hosp === 'yes').map(x => ({ kind: 'hosp', date: x.date, end: x.end })), ...p.biopsies.map(b => ({ kind: 'bx', date: b.date }))];
+  const lvOf = (e, keys) => worst(entryAlerts(p, e), keys);
+  const lvTxt = { crit: 'Ngoài ngưỡng, cần liên hệ', warn: 'Ngoài ngưỡng theo dõi' };
+  const S1 = 'var(--series)', S2 = 'var(--series-2)';
+  return [
+    { id: 'cr', title: 'Creatinin máu', unit: 'µmol/L', series: [{ label: 'Creatinin', color: S1, pts: pts('cr') }], refs: (() => { const b = crBaseNow(p), fx = crFixed(p); if (!b) return []; const r = [{ y: b.v, label: `Nền hiện tại ${b.v}` }, { y: Math.round(b.v * 1.3), label: 'Nền +30% (AKI)', tone: 'crit' }]; if (fx && Math.abs(fx.v - b.v) >= 5) r.push({ y: fx.v, label: `Mốc ${fx.lbl} ${fx.v}` }); return r; })(), status: q => lvOf(q.e, ['cr']), statusText: q => lvTxt[lvOf(q.e, ['cr'])] },
+    { id: 'egfr', title: 'eGFR', unit: 'mL/ph/1,73 m²', sub: 'Tự tính theo CKD-EPI 2021', series: [{ label: 'eGFR', color: S1, pts: pts(null, e => egfrOf(p, e)) }] },
+    { id: 'tac', title: 'Tacrolimus (FK) C0', unit: 'ng/mL', sub: 'Vùng tô: khung đích (BS ghi ở lần tái khám; nếu chưa ghi, dùng khung mặc định của khoa)', digits: 1, series: [{ label: 'FK', color: S1, pts: pts('tac') }], bands: bandsFor(p, 'tac'), status: q => lvOf(q.e, ['tac']), statusText: q => lvTxt[lvOf(q.e, ['tac'])] },
+    { id: 'tdose', title: 'Liều tacrolimus', unit: 'mg/ngày', sub: 'Liều theo đơn sau mỗi lần tái khám', digits: 2, zero: true, step: true, series: [{ label: 'Liều', color: S1, pts: pts(null, e => dTot(e.tdAM, e.tdPM)) }] },
+    ...(p.entries.some(e => has(e.evr) || has(e.edAM)) ? [
+      { id: 'evr', title: 'Everolimus C0', unit: 'ng/mL', sub: 'Vùng tô: khung đích everolimus', digits: 1, series: [{ label: 'Everolimus', color: S1, pts: pts('evr') }], bands: bandsFor(p, 'evr'), status: q => lvOf(q.e, ['evr']), statusText: q => lvTxt[lvOf(q.e, ['evr'])] },
+      { id: 'edose', title: 'Liều everolimus', unit: 'mg/ngày', digits: 2, zero: true, step: true, series: [{ label: 'Liều', color: S1, pts: pts(null, e => dTot(e.edAM, e.edPM)) }] }] : []),
+    { id: 'glu', title: 'Glucose máu', unit: 'mmol/L', digits: 1, series: [{ label: 'Glucose', color: S1, pts: pts('glu') }], refs: [{ y: 7, label: 'Ngưỡng lúc đói 7,0' }], status: q => lvOf(q.e, ['glu']), statusText: q => lvTxt[lvOf(q.e, ['glu'])] },
+    ...(p.entries.some(e => has(e.hba1c)) ? [{ id: 'hba1c', title: 'HbA1c', unit: '%', digits: 1, series: [{ label: 'HbA1c', color: S1, pts: pts('hba1c') }], refs: [{ y: 7, label: p.dm && p.dm !== 'no' ? 'Mục tiêu < 7%' : 'Ngưỡng 7%' }, { y: 6.5, label: 'Chẩn đoán ĐTĐ 6,5%' }], status: q => lvOf(q.e, ['hba1c']), statusText: q => lvTxt[lvOf(q.e, ['hba1c'])] }] : []),
+    { id: 'prot', title: 'Đạm niệu 24 giờ', unit: 'g/24 giờ', digits: 2, zero: true, series: [{ label: 'Đạm niệu', color: S1, pts: pts('prot') }], refs: [{ y: 0.5, label: 'Ngưỡng 0,5' }], status: q => lvOf(q.e, ['prot']), statusText: q => lvTxt[lvOf(q.e, ['prot'])] },
+    { id: 'bp', title: 'Huyết áp', unit: 'mmHg', legend: [['Tâm thu', S1], ['Tâm trương', S2]], series: [{ label: 'Tâm thu', color: S1, pts: pts('sbp') }, { label: 'Tâm trương', color: S2, pts: pts('dbp'), labelBelow: true }], refs: [{ y: 130, label: 'Mục tiêu < 130' }, { y: 80, label: 'Mục tiêu < 80' }], status: q => lvOf(q.e, ['bp']), statusText: q => lvTxt[lvOf(q.e, ['bp'])] },
+    { id: 'wt', title: 'Cân nặng', unit: 'kg', digits: 1, series: [{ label: 'Cân nặng', color: S1, pts: pts('wt') }] }
+  ].map(c => ({ ...c, events: ev, txDate: p.txDate }));
+}
+const RANGES = [['3m', '3 tháng', 92], ['6m', '6 tháng', 183], ['1y', '1 năm', 366], ['all', 'Tất cả', null]];
+function renderCharts() {
+  const p = cur(), el = $('#tab-charts');
+  el.innerHTML = `<div class="page-h"><h1>Diễn tiến thận ghép</h1><p>${dayLabel(diffDays(p.txDate, TODAY))}. ${p.entries.length} lần ghi kết quả.</p></div>
+   <div class="seg" role="tablist" aria-label="Cách xem">${[['chart', 'Đồ thị'], ['timeline', 'Dòng thời gian'], ['table', 'Bảng'], ['summary', 'Tóm tắt']].map(([k, l]) => `<button role="tab" data-view="${k}" aria-selected="${UI.view === k}">${l}</button>`).join('')}</div>
+   <div id="cv" class="stack" style="gap:14px"></div>`;
+  el.onclick = ev => {
+    const v = ev.target.closest('[data-view]'); if (v) { UI.view = v.dataset.view; renderCharts(); return; }
+    const r = ev.target.closest('[data-range]'); if (r) { UI.range = r.dataset.range; renderCharts(); return; }
+    const d = ev.target.closest('[data-del]'); if (d) { if (!armConfirm(d, 'Xác nhận xoá')) return; p.entries = p.entries.filter(e => e.id !== d.dataset.del); save(); toast('Đã xoá lần ghi'); renderCharts(); return; }
+    const g = ev.target.closest('[data-go]'); if (g) setTab(g.dataset.go);
+  };
+  const cv = $('#cv');
+  if (!p.entries.length) { cv.innerHTML = `<div class="card"><p class="empty-s">Chưa có kết quả nào. Bấm “Nhập” để ghi lần tái khám đầu tiên.</p><div class="actions" style="justify-content:center"><button class="btn primary" data-go="entry">Nhập kết quả</button></div></div>`; return; }
+  if (UI.view === 'timeline') { cv.innerHTML = timelineHTML(p); return; }
+  if (UI.view === 'table') { cv.innerHTML = tableHTML(p); return; }
+  if (UI.view === 'summary') { renderSummary(p, cv); return; }
+  const lastD = p.entries[p.entries.length - 1].date, x1 = addDays(lastD > TODAY ? lastD : (diffDays(lastD, TODAY) <= 14 ? TODAY : lastD), 5);
+  const rg = RANGES.find(r => r[0] === UI.range) || RANGES[3];
+  let x0 = rg[2] ? addDays(x1, -rg[2]) : addDays(p.txDate, -4); if (x0 < addDays(p.txDate, -4)) x0 = addDays(p.txDate, -4);
+  const defs = chartDefs(p);
+  cv.innerHTML = `<div class="ranges" role="group" aria-label="Khoảng thời gian">${RANGES.map(r => `<button data-range="${r[0]}" aria-pressed="${UI.range === r[0]}">${r[1]}</button>`).join('')}</div>
+    <div class="legend"><span><i class="lg-hosp"></i>NV: đợt nhập viện</span><span><i class="lg-bx"></i>S: sinh thiết thận ghép</span><span><i class="lg-band"></i>Khung đích FK</span><span>Điểm màu cam/đỏ: ngoài ngưỡng</span></div>
+    ${defs.map(d => `<div class="card chart-card"><div class="ch-h"><h2>${d.title}</h2><span class="u">${d.unit}</span></div>${d.sub ? `<div class="ch-sub">${d.sub}</div>` : ''}${d.legend ? `<div class="legend" style="margin-bottom:4px">${d.legend.map(([l, c]) => `<span><i class="lg-line" style="border-color:${c}"></i>${l}</span>`).join('')}</div>` : ''}<div class="chart" id="ch-${d.id}"></div></div>`).join('')}`;
+  const VE = p.entries.filter(e => has(e.cmv) || has(e.bkv)).slice().reverse();
+  if (VE.length) {
+    const vp = (e, k) => { const v = e[k]; if (v == null) return '<span class="muted">—</span>'; if (v <= 0) return pill('ok', 'Âm tính'); return pill(worst(entryAlerts(p, e), [k]) === 'crit' ? 'crit' : 'warn', fmtN(v)); };
+    cv.insertAdjacentHTML('beforeend', `<div class="card"><div class="card-h"><h2>Kết quả virus (CMV, BKV)</h2><span class="muted small">Đơn vị: copies/mL</span></div><div class="tbl-wrap"><table><thead><tr><th>Ngày</th><th>Ngày sau ghép</th><th>CMV DNA máu</th><th>BKV DNA máu</th></tr></thead><tbody>${VE.map(e => `<tr><td>${fmtD(e.date)}</td><td>${diffDays(p.txDate, e.date)}</td><td>${vp(e, 'cmv')}</td><td>${vp(e, 'bkv')}</td></tr>`).join('')}</tbody></table></div></div>`);
+  }
+  defs.forEach(d => { const host = $('#ch-' + d.id); const n = d.series[0].pts.length; d.x0 = x0; d.x1 = x1; d.aria = `${d.title}: ${n} giá trị${n ? `, gần nhất ${fmtN(d.series[0].pts[n - 1].v, d.digits || 0)} ${d.unit} ngày ${fmtD(d.series[0].pts[n - 1].x)}` : ''}. Dùng phím mũi tên để xem từng điểm.`; drawChart(host, d); });
+}
+function missReports(p, days) { return p.entries.filter(e => diffDays(e.date, TODAY) <= days && diffDays(e.date, TODAY) >= 0 && (e.sym || []).includes('quenthuoc')).length; }
+function renderSummary(p, cv) {
+  const lastD = p.entries[p.entries.length - 1].date, x1 = addDays(lastD, 3), from = addDays(lastD, -92);
+  const E = p.entries.filter(e => e.date >= from).slice().reverse(), day = diffDays(p.txDate, TODAY), anyE = E.some(e => has(e.evr) || has(e.edAM)), anyS = E.some(e => has(e.srl) || has(e.sdAM));
+  const al = E.flatMap(e => entryAlerts(p, e).filter(a => a.lv !== 'info')), nC = al.filter(a => a.lv === 'crit').length, nW = al.length - nC;
+  const syms = [...new Set(E.flatMap(e => e.sym || []))].map(k => (SYM.find(s => s[0] === k) || [, k])[1]);
+  const evs = [...p.events.filter(v => (v.end || v.date) >= from).map(v => `${fmtD(v.date)}: ${EVT[v.type] || ''}${v.hosp === 'yes' ? ' (nhập viện)' : ''}. ${v.detail}`), ...p.biopsies.filter(b => b.date >= from).map(b => `${fmtD(b.date)}: sinh thiết, ${BANFF[b.banff] || ''}${b.grade ? ' ' + b.grade : ''}`)];
+  const nMiss = missReports(p, 30), a7 = adherence(p, 7), a30 = adherence(p, 30);
+  const cls = (e, k) => { const w = worst(entryAlerts(p, e), [k]); return w === 'crit' ? ' class="c"' : w === 'warn' ? ' class="w"' : ''; };
+  const rows = E.map(e => `<tr><td>${fmtD(e.date)}</td><td${cls(e, 'cr')}>${fmtN(e.cr)}</td><td>${egfrOf(p, e) ?? '—'}</td><td${cls(e, 'tac')}>${fmtN(e.tac, 1)}</td><td>${has(e.tdAM) || has(e.tdPM) ? mg(dTot(e.tdAM, e.tdPM)) : '—'}</td>${anyE ? `<td${cls(e, 'evr')}>${fmtN(e.evr, 1)}</td><td>${has(e.edAM) || has(e.edPM) ? mg(dTot(e.edAM, e.edPM)) : '—'}</td>` : ''}${anyS ? `<td${cls(e, 'srl')}>${fmtN(e.srl, 1)}</td><td>${has(e.sdAM) || has(e.sdPM) ? mg(dTot(e.sdAM, e.sdPM)) : '—'}</td>` : ''}<td${cls(e, 'bp')}>${e.sbp != null ? e.sbp + '/' + (e.dbp ?? '—') : '—'}</td><td${cls(e, 'glu')}>${fmtN(e.glu, 1)}</td><td${cls(e, 'prot')}>${fmtN(e.prot, 2)}</td></tr>`).join('');
+  cv.innerHTML = `<p class="small">Đưa màn hình này cho bác sĩ khi tái khám. Số liệu do người bệnh tự nhập, 3 tháng gần nhất (${fmtD(from)} – ${fmtD(lastD)}).</p>
+  <div class="card"><div class="card-h"><h2>${esc(p.name || 'Người bệnh')}</h2><span class="muted small">${esc(p.hospitalId || '')}</span></div>
+    <div class="sum-kpi"><span>${p.sex === 'F' ? 'Nữ' : 'Nam'}, ${ageAt(p.dob, TODAY)} tuổi</span><span>Ghép ${fmtD(p.txDate)} · <b>ngày ${day}</b></span><span>${esc(p.donorType)}${p.related === 'yes' ? ', huyết thống' : ''}</span><span>Creatinin nền <b>${baseCrOf(p) ?? '—'}</b> µmol/L (${baseLbl(p)})</span><span>BS điều trị: ${esc(p.drName || '—')}</span></div></div>
+  <div class="card"><h2>Tuân thủ thuốc</h2><div class="sum-kpi"><span>Đánh dấu đã uống 7 ngày: <b>${a7 ?? '—'}%</b></span><span>30 ngày: <b>${a30 ?? '—'}%</b></span><span>Báo quên/bỏ liều trong 30 ngày: <b>${nMiss} lần</b></span></div></div>
+  ${(() => { const to = lastD, fr = addDays(lastD, -365), iv = tacIPV(p, fr, to), tr = tacTTR(p, fr, to), le = p.entries.slice().reverse().find(e => has(e.tac)), cd = le ? cdRatio(p, le, 'tac') : null;
+    return `<div class="card"><div class="card-h"><h2>Phơi nhiễm tacrolimus (12 tháng)</h2><span class="muted small">${esc(REGIMENS[regOn(p, TODAY)])}</span></div><div class="sum-kpi">
+      <span>IPV (CV%): <b>${iv.cv == null ? '— (cần ≥ 3 mẫu)' : fmtN(iv.cv, 0) + '%'}</b>${iv.cv != null && iv.cv > 25 ? ' ' + pill('warn', 'Dao động cao') : ''} <span class="muted small">n = ${iv.n}</span></span>
+      <span>TTR: <b>${tr.ttr == null ? '—' : fmtN(tr.ttr, 0) + '%'}</b>${tr.ttr != null && tr.ttr < 40 ? ' ' + pill('warn', 'TTR thấp') : ''}</span>
+      <span>C/D gần nhất: <b>${cd == null ? '—' : fmtN(cd, 2)}</b> <span class="muted small">ng/mL trên mg/ngày</span></span></div>
+      <p class="small muted" style="margin-top:8px">IPV tính trên các mẫu tái khám định kỳ (bỏ mẫu lúc có bất thường); CV > 25–30% thường dùng để nhận diện dao động cao, chưa có ngưỡng chuẩn hoá. TTR nội suy tuyến tính giữa các lần đo, so với khung đích từng thời điểm.</p></div>`; })()}
+  ${(() => { const c = crChronic(p); if (!c.fixed) return ''; const pc = c.vsFixed == null ? null : Math.round(c.vsFixed * 100);
+    return `<div class="card"><div class="card-h"><h2>Chức năng thận ghép dài hạn</h2><span class="muted small">Chỉ BS xem</span></div><div class="sum-kpi">
+      <span>Creatinin nền hiện tại: <b>${c.now ? c.now.v : '—'}</b> µmol/L <span class="muted small">(${c.now ? esc(c.now.lbl) : '—'})</span></span>
+      <span>So với mốc ${esc(c.fixed.lbl)} ${c.fixed.v}: <b>${pc == null ? '—' : (pc > 0 ? '+' : '') + pc + '%'}</b>${pc != null && pc > 30 ? ' ' + pill('warn', 'Nghi suy giảm mạn') : ''}</span>
+      <span>Độ dốc eGFR 12 tháng: <b>${c.slope == null ? '— (cần ≥ 3 lần ổn định, cách ≥ 6 tháng)' : (c.slope > 0 ? '+' : '') + fmtN(c.slope, 1)}</b>${c.slope != null ? ' <span class="muted small">mL/ph/1,73 m²/năm</span>' : ''}${c.slope != null && c.slope < -5 ? ' ' + pill('warn', 'Giảm nhanh') : ''}</span></div>
+      <p class="small muted" style="margin-top:8px">Nền hiện tại = trung vị 3 kết quả ổn định gần nhất trong 12 tháng (không bị cảnh báo creatinin), hoặc mốc cố định khi chưa đủ dữ liệu. Độ dốc eGFR tính bằng hồi quy tuyến tính trên các kết quả ổn định.</p></div>`; })()}
+  <div class="card"><div class="card-h"><h2>Kết quả 3 tháng</h2><span class="muted small">${nC} cảnh báo đỏ · ${nW} cảnh báo vàng</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Ngày</th><th>Cr</th><th>eGFR</th><th>FK</th><th>Liều FK</th>${anyE ? '<th>EVR</th><th>Liều EVR</th>' : ''}${anyS ? '<th>SRL</th><th>Liều SRL</th>' : ''}<th>HA</th><th>Glu</th><th>Đạm niệu</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${syms.length ? `<p class="small" style="margin-top:10px"><b>Triệu chứng đã ghi:</b> ${esc(syms.join(', '))}</p>` : ''}
+    ${(() => { const lastOf = k => E.find(e => has(e[k])); const h = lastOf('hba1c'), c = lastOf('cmv'), b = lastOf('bkv'); const t = [h ? `HbA1c ${fmtN(h.hba1c, 1)}% (${fmtDs(h.date)})` : '', c ? `CMV ${c.cmv > 0 ? fmtN(c.cmv) + ' copies/mL' : 'âm tính'} (${fmtDs(c.date)})` : '', b ? `BKV ${b.bkv > 0 ? fmtN(b.bkv) + ' copies/mL' : 'âm tính'} (${fmtDs(b.date)})` : ''].filter(Boolean); return t.length ? `<p class="small" style="margin-top:6px"><b>Gần nhất:</b> ${esc(t.join(' · '))}</p>` : ''; })()}
+    ${evs.length ? `<p class="small" style="margin-top:6px"><b>Biến cố, sinh thiết:</b> ${esc(evs.join(' · '))}</p>` : ''}</div>
+  ${['cr', 'egfr', 'tac', ...(anyE ? ['evr'] : []), ...(anyS ? ['srl'] : [])].map(id => `<div class="card chart-card"><div class="chart" id="sm-${id}"></div></div>`).join('')}
+  ${(() => { const a = p.entries.slice().reverse().find(x => x.advice); return a ? `<div class="card"><div class="card-h"><h2>Lời dặn gần nhất</h2><span class="muted small">${fmtD(a.date)}</span></div><p class="small" style="white-space:pre-line">${esc(a.advice)}</p></div>` : ''; })()}
+  <div class="card"><h2>Thuốc đang dùng</h2><ul class="prep" style="margin-top:0">${p.meds.map(m => `<li>${esc(m.name)}: ${esc(m.dose)} (${m.times.join(', ')})</li>`).join('') || '<li>Chưa ghi</li>'}</ul></div>`;
+  const defs = chartDefs(p);
+  ['cr', 'egfr', 'tac', ...(anyE ? ['evr'] : []), ...(anyS ? ['srl'] : [])].forEach(id => { const d = defs.find(x => x.id === id); if (!d) return; d.x0 = from; d.x1 = x1; d.h = 160; d.aria = d.title + ', 3 tháng gần nhất'; const host = $('#sm-' + id); host.insertAdjacentHTML('beforebegin', `<div class="ch-h"><h2>${d.title}</h2><span class="u">${d.unit}</span></div>`); drawChart(host, d); });
+}
+function entrySummary(p, e) {
+  const g = egfrOf(p, e), it = [];
+  if (e.cr != null) it.push(`Cr <strong>${fmtN(e.cr)}</strong>`);
+  if (g) it.push(`eGFR <strong>${g}</strong>`);
+  if (e.tac != null) it.push(`FK <strong>${fmtN(e.tac, 1)}</strong>`);
+  if (has(e.tdAM) || has(e.tdPM)) it.push(`Liều FK <strong>${fmtDose(e.tdAM, e.tdPM)}</strong>`);
+  if (e.evr != null) it.push(`EVR <strong>${fmtN(e.evr, 1)}</strong>`);
+  if (has(e.edAM) || has(e.edPM)) it.push(`Liều EVR <strong>${fmtDose(e.edAM, e.edPM)}</strong>`);
+  if (e.srl != null) it.push(`SRL <strong>${fmtN(e.srl, 1)}</strong>`);
+  if (has(e.sdAM) || has(e.sdPM)) it.push(`Liều SRL <strong>${fmtDose(e.sdAM, e.sdPM)}</strong>`);
+  if (e.sbp != null) it.push(`HA <strong>${e.sbp}/${e.dbp ?? '—'}</strong>`);
+  if (e.glu != null) it.push(`Glu <strong>${fmtN(e.glu, 1)}</strong>`);
+  if (e.prot != null) it.push(`Đạm niệu <strong>${fmtN(e.prot, 2)}</strong>`);
+  if (e.hba1c != null) it.push(`HbA1c <strong>${fmtN(e.hba1c, 1)}%</strong>`);
+  if (e.cmv != null) it.push(`CMV <strong>${e.cmv > 0 ? fmtN(e.cmv) : 'âm tính'}</strong>`);
+  if (e.bkv != null) it.push(`BKV <strong>${e.bkv > 0 ? fmtN(e.bkv) : 'âm tính'}</strong>`);
+  if (e.wt != null) it.push(`CN <strong>${fmtN(e.wt, 1)}</strong>`);
+  if (e.temp != null && e.temp >= 37.5) it.push(`T° <strong>${fmtN(e.temp, 1)}</strong>`);
+  return it.map(x => `<span>${x}</span>`).join('');
+}
+function timelineHTML(p) {
+  const items = [
+    ...p.entries.map(e => ({ d: e.date, k: e.kind, e })),
+    ...p.biopsies.map(b => ({ d: b.date, k: 'biopsy', b })),
+    ...p.events.map(v => ({ d: v.date, k: 'event', v }))
+  ].sort((a, b) => a.d < b.d ? 1 : a.d > b.d ? -1 : 0);
+  let html = '', mk = '';
+  items.forEach(it => {
+    const m = it.d.slice(0, 7);
+    if (m !== mk) { if (mk) html += '</ul>'; mk = m; const dd = diffDays(p.txDate, m + '-15'); html += `<div class="tl-month">Tháng ${+m.slice(5)}/${m.slice(0, 4)}<span>${dd >= 0 ? 'tháng thứ ' + (Math.floor(dd / 30.44) + 1) + ' sau ghép' : 'trước ghép'}</span></div><ul class="tl">`; }
+    if (it.e) {
+      const al = entryAlerts(p, it.e), w = worst(al);
+      html += `<li class="k-${it.k}"><div class="th"><b>${fmtD(it.d)} · ${KIND[it.k] || ''}</b>${w !== 'ok' ? pill(w, `${al.filter(a => a.lv !== 'info').length} cảnh báo`) : ''}</div><div class="tv">${entrySummary(p, it.e)}</div>${al.filter(a => a.k.startsWith('dose_')).map(a => `<div class="tn"><b>${esc(a.title)}</b></div>`).join('')}${(it.e.sym || []).length ? `<div class="tn">Triệu chứng: ${it.e.sym.map(k => (SYM.find(s => s[0] === k) || [, k])[1]).join(', ')}</div>` : ''}${has(it.e.crBase) ? `<div class="tn"><b>BS đặt lại creatinin nền:</b> ${it.e.crBase} µmol/L</div>` : ''}${it.e.advice ? `<div class="tn"><b>BS dặn:</b> ${esc(it.e.advice)}</div>` : ''}${it.e.note ? `<div class="tn">${esc(it.e.note)}</div>` : ''}</li>`;
+    } else if (it.b) {
+      html += `<li class="k-biopsy"><div class="th"><b>${fmtD(it.d)} · Sinh thiết thận ghép</b><span class="pill na">${it.b.ind === 'quytrinh' ? 'Theo quy trình' : 'Theo chỉ định'}</span></div><div class="tn"><b>${esc(BANFF[it.b.banff] || '')}${it.b.grade ? ' · ' + esc(it.b.grade) : ''}</b>. ${esc(it.b.detail)}</div>${it.b.tx ? `<div class="tn">Xử trí: ${esc(it.b.tx)}</div>` : ''}</li>`;
+    } else {
+      html += `<li class="k-event"><div class="th"><b>${fmtD(it.d)} · ${esc(EVT[it.v.type] || 'Biến cố')}</b>${it.v.hosp === 'yes' ? pill('crit', 'Nhập viện' + (it.v.end ? ' đến ' + fmtDs(it.v.end) : '')) : ''}</div><div class="tn">${esc(it.v.detail)}</div></li>`;
+    }
+  });
+  return `<p class="muted small">Mới nhất ở trên. Gồm các lần tái khám, lần ghi khi có bất thường, sinh thiết và biến cố.</p>${html}</ul>`;
+}
+function tableHTML(p) {
+  const anyS = p.entries.some(e => has(e.srl) || has(e.sdAM)), anyE = p.entries.some(e => has(e.evr) || has(e.edAM)), anyH = p.entries.some(e => has(e.hba1c)), anyV = p.entries.some(e => has(e.cmv) || has(e.bkv));
+  const vir = v => v == null ? '—' : v > 0 ? fmtN(v) : 'Âm tính';
+  const cls = (e, k) => { const w = worst(entryAlerts(p, e), [k]); return w === 'crit' ? ' class="c"' : w === 'warn' ? ' class="w"' : ''; };
+  const dz = (a, b) => { const t = dTot(a, b); return t == null ? '—' : fmtN(t, 2).replace(/,?0+$/, ''); };
+  const cd = (e, k) => { const r = cdRatio(p, e, k); return r == null ? '—' : fmtN(r, 2); };
+  const rows = p.entries.slice().reverse().map(e => `<tr><td>${fmtD(e.date)}</td><td>${diffDays(p.txDate, e.date)}</td><td class="l">${KIND[e.kind] || ''}</td><td${cls(e, 'hr')}>${e.hr ?? '—'}</td><td${cls(e, 'bp')}>${e.sbp != null ? e.sbp + '/' + (e.dbp ?? '—') : '—'}</td><td${cls(e, 'wt')}>${fmtN(e.wt, 1)}</td><td${cls(e, 'temp')}>${fmtN(e.temp, 1)}</td><td${cls(e, 'glu')}>${fmtN(e.glu, 1)}</td><td${cls(e, 'cr')}>${fmtN(e.cr)}</td><td>${egfrOf(p, e) ?? '—'}</td><td${cls(e, 'tac')}>${fmtN(e.tac, 1)}<span class="muted small"> ${e.tac != null ? '(' + tgtTxt(tgtForEntry(p, e, 'tac')) + ')' : ''}</span></td><td>${dz(e.tdAM, e.tdPM)}</td><td>${cd(e, 'tac')}</td>${anyE ? `<td${cls(e, 'evr')}>${fmtN(e.evr, 1)}</td><td>${dz(e.edAM, e.edPM)}</td>` : ''}${anyS ? `<td${cls(e, 'srl')}>${fmtN(e.srl, 1)}</td><td>${dz(e.sdAM, e.sdPM)}</td>` : ''}<td${cls(e, 'prot')}>${fmtN(e.prot, 2)}</td>${anyH ? `<td${cls(e, 'hba1c')}>${fmtN(e.hba1c, 1)}</td>` : ''}${anyV ? `<td${cls(e, 'cmv')}>${vir(e.cmv)}</td><td${cls(e, 'bkv')}>${vir(e.bkv)}</td>` : ''}<td><button class="btn sm danger" data-del="${e.id}">Xoá</button></td></tr>`).join('');
+  return `<p class="muted small">Ô màu cam/đỏ: ngoài ngưỡng theo dõi. C/D: nồng độ chia liều mỗi ngày đang uống trước lần lấy máu (ng/mL trên mg). Cuộn ngang để xem đủ cột.</p><div class="tbl-wrap"><table><thead><tr><th>Ngày</th><th>Ngày sau ghép</th><th class="l">Loại</th><th>Mạch</th><th>HA</th><th>CN (kg)</th><th>T° (°C)</th><th>Glu (mmol/L)</th><th>Cr (µmol/L)</th><th>eGFR</th><th>FK (ng/mL)</th><th>Liều FK (mg/ngày)</th><th>C/D FK</th>${anyE ? '<th>EVR (ng/mL)</th><th>Liều EVR (mg/ngày)</th>' : ''}${anyS ? '<th>SRL (ng/mL)</th><th>Liều SRL (mg/ngày)</th>' : ''}<th>Đạm niệu (g/24h)</th>${anyH ? '<th>HbA1c (%)</th>' : ''}${anyV ? '<th>CMV (copies/mL)</th><th>BKV (copies/mL)</th>' : ''}<th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* ================= Thuốc ================= */
+function ixCard(p, r, forMed) {
+  const lv = r.sev === 'ok' ? 'ok' : r.sev, lab = { crit: 'Nguy hiểm, tránh dùng', warn: 'Cần BS chỉnh liều / theo dõi', info: 'Lưu ý', ok: 'Không tương tác quan trọng' }[r.sev];
+  const ap = r.aff && ixApplies(p, r) ? `<p class="apply">Liên quan thuốc bạn đang dùng: ${r.aff.map(a => MEDCLS[a]).filter((x, i, A) => patientCls(p).has(r.aff[i]) && A.indexOf(x) === i).join(', ')}</p>` : '';
+  return `<div class="ix"><div class="ixh"><span class="ixn">${esc(forMed || r.label)}</span>${pill(lv, lab)}</div>${forMed ? `<p class="muted small">${esc(r.label)}</p>` : ''}<p>${esc(r.eff)}</p><p><b>Nên làm:</b> ${esc(r.act)}</p>${ap}</div>`;
+}
+function renderMeds() {
+  const p = cur(), el = $('#tab-meds');
+  const ixRes = () => {
+    const q = UI.ixq.trim(); if (!q) return '<p class="muted small">Gõ tên thuốc (tên hoạt chất hoặc biệt dược) trước khi dùng thuốc mới.</p>';
+    const rs = findIx(q); if (!rs.length) return `<div class="ix"><div class="ixh"><span class="ixn">${esc(q)}</span>${pill('info', 'Chưa có trong danh sách')}</div><p>Danh sách bản mẫu chưa có thuốc này. Hãy hỏi BS ghép hoặc dược sĩ trước khi dùng, kể cả thuốc không kê đơn.</p></div>`;
+    return rs.map(r => ixCard(p, r)).join('');
+  };
+  el.innerHTML = `<div class="page-h"><h1>Thuốc</h1><p>Danh sách thuốc đang dùng và kiểm tra tương tác với thuốc chống thải ghép.</p></div>
+  ${(() => { const a7 = adherence(p, 7), a30 = adherence(p, 30), nm = missReports(p, 30), lv = a7 == null ? 'na' : a7 >= 95 ? 'ok' : 'warn';
+    return `<div class="card"><div class="card-h"><h2>Tuân thủ thuốc</h2>${a7 != null ? pill(lv, a7 >= 95 ? 'Đều đặn' : 'Cần cải thiện') : ''}</div><div class="sum-kpi">
+      <span>Đã đánh dấu uống thuốc 7 ngày qua: <b>${a7 ?? '—'}%</b></span><span>30 ngày qua: <b>${a30 ?? '—'}%</b></span><span>Số lần báo quên hoặc bỏ liều (30 ngày): <b>${nm}</b></span></div>
+      <p class="muted small" style="margin-top:8px">Tính từ các lần bạn đánh dấu "đã uống" ở trang Tổng quan. Mục tiêu: đủ 100% số liều, đúng giờ. Quên liều: đánh dấu triệu chứng "Quên hoặc bỏ liều" khi nhập kết quả và hỏi BS cách xử trí.</p></div>`; })()}
+  <div class="card"><div class="card-h"><h2>Thẻ “Thuốc cần tránh”</h2><button class="btn sm" type="button" data-wallet>Hiện toàn màn hình</button></div>${walletHTML(p)}<p class="muted small" style="margin-top:8px">Đưa thẻ này cho nhà thuốc, nha sĩ hoặc bác sĩ khác trước khi nhận thuốc mới.</p></div>
+  <div class="card"><h2>Kiểm tra tương tác trước khi dùng thuốc mới</h2>
+    <div class="field" style="margin-bottom:10px"><label for="ix-q">Tên thuốc</label><input id="ix-q" type="search" autocomplete="off" placeholder="Ví dụ: Klacid, ibuprofen, Paxlovid, thuốc nam…" value="${esc(UI.ixq)}"></div>
+    <div class="quick" style="margin-bottom:12px">${['Paxlovid', 'Clarithromycin', 'Fluconazol', 'Ibuprofen', 'Rifampicin', 'Bưởi', 'Thuốc nam', 'Paracetamol'].map(x => `<button type="button" data-q="${x}">${x}</button>`).join('')}</div>
+    <div class="stack" id="ix-out">${ixRes()}</div>
+    <p class="muted small" style="margin-top:10px">Danh sách chọn lọc dùng cho bản mẫu, chờ BS và dược sĩ duyệt; không thay thế tư vấn chuyên môn.</p>
+  </div>
+  <div class="card"><div class="card-h"><h2>Thuốc đang dùng</h2><span class="muted small">${p.meds.length} thuốc</span></div>
+    <div class="rows">${p.meds.length ? p.meds.map(m => { const r = medIx(p, m), ed = UI.editMed === m.id, h = (m.hist || []).slice(-2).reverse();
+      return `<div class="row"${ed ? ' style="flex-wrap:wrap"' : ''}><div class="rm"><div class="rn">${esc(m.name)}</div><div class="rd"><b>${esc(doseText(m))}</b>${m.cls ? ' · ' + MEDCLS[m.cls] : ''}</div><div class="times">${m.times.map(t => `<span>${t}${m.td && m.td[t] != null ? ' · ' + mg(m.td[t]) + ' ' + (m.unit || 'mg') : ''}</span>`).join('')}</div>${m.doseDate ? `<div class="rd" style="margin-top:4px">Liều hiện tại từ ${fmtD(m.doseDate)}${h.length ? '. Trước đó: ' + h.map(x => esc(x.dose) + ' (đến ' + fmtDs(x.date) + ')').join('; ') : ''}</div>` : ''}${r ? `<div style="margin-top:8px">${ixCard(p, r, 'Tương tác cần biết')}</div>` : ''}</div>
+        <div class="stack" style="gap:6px;align-items:flex-end">${ed ? '' : `<button class="btn sm" type="button" data-edm="${m.id}">Đổi liều</button>`}<button class="btn sm danger" data-rm="${m.id}">Bỏ thuốc</button></div>
+        ${ed ? `<form class="form" data-mf="${m.id}" novalidate style="flex-basis:100%;margin-top:10px;border-top:1px solid var(--line);padding-top:10px"><h3 style="margin-bottom:6px">Đổi liều ${esc(m.name)}</h3>${medDoseFields('me', m.times, m.td, m.unit)}<div class="grid2"><div class="field"><label for="me-date">Áp dụng từ ngày</label><input id="me-date" type="date" value="${TODAY}" max="${addDays(TODAY, 30)}"></div></div><p class="small" id="me-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Lưu liều mới</button><button class="btn" type="button" data-edm-cancel>Huỷ</button></div><p class="small muted" style="margin-top:6px">Liều mới thay cho liều cũ trên cùng một dòng; không tạo dòng thuốc mới.</p></form>` : ''}</div>`; }).join('') : '<p class="muted">Chưa có thuốc.</p>'}</div>
+    <details class="add" style="margin-top:12px"><summary>Thêm thuốc</summary>
+      <form id="f-med" class="form" novalidate><div class="field"><span class="flabel">Chọn nhanh thuốc thường dùng</span><div class="quick" style="margin-top:6px">${QUICK_MEDS.map((q, i) => `<button type="button" data-qm="${i}">${esc(q[3])}</button>`).join('')}</div><small>Bấm để điền sẵn tên, nhóm và giờ uống; nhập liều theo đơn.</small></div><div class="grid2">
+        <div class="field"><label for="m-name">Tên thuốc</label><input id="m-name" required></div>
+        <div class="field"><label for="m-cls">Nhóm</label><small id="m-cls-h" style="display:block;margin-bottom:4px">App tự nhận nhóm thuốc chống thải ghép theo tên; sửa nếu chưa đúng.</small><select id="m-cls">${Object.entries(MEDCLS).map(([k, v]) => `<option value="${k}"${k === '' ? ' selected' : ''}>${v}</option>`).join('')}</select></div>
+      </div>${medDoseFields('m', [], null, 'mg')}<p class="small" id="m-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Thêm thuốc</button></div></form>
+    </details>
+  </div>
+  <div class="card"><h2>Lưu ý khi dùng thuốc chống thải ghép</h2><ul class="prep" style="margin-top:0">
+    <li>Uống tacrolimus đúng giờ mỗi ngày (dạng 2 lần/ngày: cách nhau 12 giờ), cùng một cách so với bữa ăn.</li>
+    <li>Ngày lấy máu đo FK: lấy máu trước, uống thuốc sau.</li>
+    <li>Không tự ngưng, giảm hay tăng liều. Quên liều: hỏi BS, không uống gấp đôi.</li>
+    <li>Không dùng thuốc giảm đau nhóm NSAID; tránh bưởi; không tự dùng thuốc nam, thực phẩm chức năng.</li>
+    <li>Báo cho mọi bác sĩ, nha sĩ, dược sĩ biết bạn là người ghép thận.</li></ul></div>`;
+  const q = $('#ix-q');
+  q.oninput = () => { UI.ixq = q.value; $('#ix-out').innerHTML = ixRes(); };
+  el.oninput = ev => { const t = ev.target; if (t.dataset && t.dataset.timesFor) refreshDz(t.dataset.timesFor); };
+  el.onsubmit = ev => {
+    const f = ev.target.closest('[data-mf]'); if (!f) return; ev.preventDefault();
+    const m = p.meds.find(x => x.id === f.dataset.mf), er = $('#me-err'), rd = readDose('me');
+    if (!m) return; if (rd.err) { er.textContent = rd.err; er.hidden = false; return; }
+    const d = $('#me-date').value || TODAY, old = doseText(m);
+    const same = m.td && JSON.stringify(m.td) === JSON.stringify(rd.td) && m.unit === rd.unit && m.times.join() === rd.times.join();
+    if (same) { er.textContent = 'Liều mới giống liều đang dùng.'; er.hidden = false; return; }
+    (m.hist = m.hist || []).push({ date: d, dose: old }); m.times = rd.times; m.td = rd.td; m.unit = rd.unit; m.dose = doseText(m); m.doseDate = d;
+    UI.editMed = null; save(); toast(`Đã đổi liều ${m.name}: ${m.dose}`); renderMeds();
+  };
+  $('#m-name').oninput = () => { const k = guessCls($('#m-name').value); if (k != null) $('#m-cls').value = k; };
+  el.onclick = ev => {
+    const qm = ev.target.closest('[data-qm]'); if (qm) { const q = QUICK_MEDS[+qm.dataset.qm]; $('#m-name').value = q[0]; $('#m-cls').value = q[1]; $('#m-times').value = q[2].join(', '); refreshDz('m'); $('#m-err').hidden = true; const d0 = $('#m-dz input'); if (d0) d0.focus(); return; }
+    const at = ev.target.closest('[data-addt]'); if (at) { const px = at.dataset.px || 'm', i = $('#' + px + '-times'), cur0 = parseTimes(i.value) || [], t = at.dataset.addt; const k = cur0.indexOf(t); if (k >= 0) cur0.splice(k, 1); else cur0.push(t); i.value = cur0.sort().join(', '); refreshDz(px); return; }
+    const ed = ev.target.closest('[data-edm]'); if (ed) { UI.editMed = ed.dataset.edm; renderMeds(); const f = $('[data-mf] input[data-t]'); if (f) f.focus(); return; }
+    if (ev.target.closest('[data-edm-cancel]')) { UI.editMed = null; renderMeds(); return; }
+    const b = ev.target.closest('[data-q]'); if (b) { UI.ixq = b.dataset.q; q.value = UI.ixq; $('#ix-out').innerHTML = ixRes(); return; }
+    if (ev.target.closest('[data-wallet]')) { openSheet(walletHTML(p)); return; }
+    const rm = ev.target.closest('[data-rm]'); if (rm) { if (!armConfirm(rm, 'Xác nhận bỏ')) return; p.meds = p.meds.filter(m => m.id !== rm.dataset.rm); save(); toast('Đã bỏ thuốc khỏi danh sách'); renderMeds(); }
+  };
+  $('#f-med').onsubmit = ev => {
+    ev.preventDefault(); const name = $('#m-name').value.trim(), rd = readDose('m'), cls = $('#m-cls').value, e = $('#m-err');
+    const fail = (msg, el2) => { e.textContent = msg; e.hidden = false; toast(msg); if (el2) el2.focus(); };
+    if (!name) return fail('Nhập tên thuốc.', $('#m-name'));
+    if (rd.err) return fail(rd.err, $('#m-times'));
+    const dup = p.meds.find(x => (cls && x.cls === cls) || x.name.trim().toLowerCase() === name.toLowerCase());
+    if (dup) return fail(`Đã có ${dup.name} trong danh sách. Để tăng hoặc giảm liều, bấm "Đổi liều" ở dòng thuốc đó, không thêm dòng mới (tránh uống nhầm liều). Nếu đổi sang thuốc khác cùng nhóm, hãy bỏ thuốc cũ trước.`);
+    const m = med(name, '', rd.times, cls); m.td = rd.td; m.unit = rd.unit; m.dose = doseText(m); m.doseDate = TODAY;
+    p.meds.push(m); save(); const r = medIx(p, m);
+    toast(r && r.sev !== 'ok' ? 'Đã thêm thuốc. Có tương tác cần lưu ý.' : 'Đã thêm thuốc'); renderMeds();
+  };
+}
+
+/* Ô giờ uống + liều cho từng giờ (dùng chung cho Thêm thuốc và Đổi liều) */
+function medDoseFields(px, times, td, unit) {
+  return `<div class="grid2"><div class="field"><label for="${px}-times">Giờ uống</label><input id="${px}-times" data-times-for="${px}" placeholder="08:00, 20:00" value="${(times || []).join(', ')}"><div class="quick" style="margin-top:6px">${['07:00', '08:00', '09:00', '19:00', '20:00', '21:00'].map(t => `<button type="button" data-addt="${t}" data-px="${px}">${t}</button>`).join('')}</div><small>Bấm để chọn hoặc bỏ giờ; hoặc gõ: 8h, 20h…</small></div>
+    <div class="field"><label for="${px}-unit">Đơn vị liều</label><select id="${px}-unit">${['mg', 'viên', 'g', 'mL'].map(u => `<option${u === (unit || 'mg') ? ' selected' : ''}>${u}</option>`).join('')}</select></div></div>
+    <div id="${px}-dz">${dzHTML(px, times || [], td)}</div>`;
+}
+function dzHTML(px, times, td) {
+  if (!times.length) return '<p class="small muted" style="margin:4px 0 8px">Chọn giờ uống, rồi nhập liều cho từng giờ.</p>';
+  return `<div class="grid2">${times.map((t, i) => `<div class="field"><label for="${px}-d${i}">Liều lúc ${t}</label><input id="${px}-d${i}" data-t="${t}" type="text" inputmode="decimal" autocomplete="off" placeholder="VD: 2,5" value="${td && td[t] != null ? mg(td[t]) : ''}"></div>`).join('')}</div><p class="small" id="${px}-tot" style="margin:2px 0 8px"></p>`;
+}
+function refreshDz(px) {
+  const box = $('#' + px + '-dz'); if (!box) return; const cur0 = {}; $$('input[data-t]', box).forEach(i => { if (i.value.trim() !== '') cur0[i.dataset.t] = pnum(i.value); });
+  const ts = parseTimes($('#' + px + '-times').value); if (ts) box.innerHTML = dzHTML(px, ts, cur0); updTot(px);
+}
+function updTot(px) {
+  const el2 = $('#' + px + '-tot'); if (!el2) return; const v = $$(`#${px}-dz input[data-t]`).map(i => pnum(i.value)); const u = $('#' + px + '-unit').value;
+  el2.textContent = v.length && v.every(x => x != null && x > 0) ? `Tổng mỗi ngày: ${mg(+v.reduce((a, c) => a + c, 0).toFixed(3))} ${u}` : '';
+}
+function readDose(px) {
+  const times = parseTimes($('#' + px + '-times').value);
+  if (!times || !times.length) return { err: 'Chọn hoặc nhập giờ uống, ví dụ 08:00, 20:00.' };
+  const td = {}; let bad = false; times.forEach(t => { const i = $(`#${px}-dz input[data-t="${t}"]`), n = i ? pnum(i.value) : null; if (!(n > 0 && n < 100000)) bad = true; else td[t] = n; });
+  if (bad) return { err: 'Nhập liều (số lớn hơn 0) cho từng giờ uống.' };
+  return { times, td, unit: $('#' + px + '-unit').value };
+}
+document.addEventListener('input', ev => { const t = ev.target; if (t && t.dataset && t.dataset.t) { const m = t.id.match(/^(\w+)-d\d+$/); if (m) updTot(m[1]); } });
+const QUICK_MEDS = [
+  ['Tacrolimus (Prograf)', 'tac', ['08:00', '20:00'], 'Prograf'],
+  ['Tacrolimus phóng thích kéo dài (Advagraf)', 'tac', ['08:00'], 'Advagraf'],
+  ['Mycophenolat mofetil (CellCept)', 'mmf', ['08:00', '20:00'], 'CellCept'],
+  ['Mycophenolat natri (Myfortic)', 'mmf', ['08:00', '20:00'], 'Myfortic'],
+  ['Methylprednisolon (Medrol)', 'pred', ['08:00'], 'Methylprednisolon (Medrol)'],
+  ['Everolimus (Certican)', 'mtor', ['08:00', '20:00'], 'Certican'],
+  ['Cotrimoxazol 480 mg (dự phòng PJP)', '', ['08:00'], 'Cotrimoxazol'],
+  ['Valganciclovir (dự phòng CMV)', '', ['08:00'], 'Valganciclovir']
+];
+/* Đọc giờ uống linh hoạt: "8h, 20h", "8:00 sáng", "08:00 20:00", "tối" */
+function parseTimes(s) {
+  const out = [], W = { 'sáng': 8, 'trưa': 12, 'chiều': 16, 'tối': 20 }; let bad = false;
+  String(s || '').toLowerCase().split(/[,;\/+]|\s(?=\d)|\s+và\s+/).map(x => x.trim()).filter(Boolean).forEach(tok => {
+    const m = tok.match(/^(\d{1,2})\s*(?:[:h.g]|giờ)?\s*(\d{2})?\s*(?:phút)?\s*(sáng|trưa|chiều|tối)?$/);
+    let h, mi = 0;
+    if (m) { h = +m[1]; mi = m[2] ? +m[2] : 0; if (m[3] && (m[3] === 'chiều' || m[3] === 'tối') && h < 12) h += 12; }
+    else if (W[tok] != null) h = W[tok]; else { bad = true; return; }
+    if (h > 23 || mi > 59) { bad = true; return; }
+    const t = `${String(h).padStart(2, '0')}:${String(mi).padStart(2, '0')}`; if (!out.includes(t)) out.push(t);
+  });
+  return bad ? null : out.sort();
+}
+function guessCls(name) {
+  const n = String(name || '').toLowerCase();
+  const T = [['tac', /tacro|prograf|advagraf|envarsus|graftac|fk506/], ['csa', /cyclospor|ciclospor|neoral|sandimmun/], ['mmf', /mycophen|cellcept|myfortic|mmf|mpa\b/], ['aza', /azathiop|imuran/], ['mtor', /everolim|certican|sirolim|rapamune/], ['pred', /predni|medrol|methylpred|solu-?medrol/]];
+  for (const [k, re] of T) if (re.test(n)) return k;
+  return n ? '' : null;
+}
+function walletHTML(p) {
+  const imm = p.meds.filter(m => ['tac', 'csa', 'mmf', 'aza', 'mtor', 'pred'].includes(m.cls)).map(m => m.name.replace(/\s*\(.*\)$/, ''));
+  return `<div class="wallet"><div class="w-top">TÔI LÀ NGƯỜI GHÉP THẬN</div><div class="w-sub">Đang dùng thuốc chống thải ghép: ${esc(imm.join(', ') || '—')}</div>
+    <div class="w-h">Không dùng khi chưa hỏi bác sĩ ghép:</div><ul>
+    <li>Thuốc giảm đau kháng viêm NSAID: ibuprofen, diclofenac, meloxicam, celecoxib…</li>
+    <li>Clarithromycin, erythromycin, rifampicin</li>
+    <li>Kháng nấm nhóm azol: fluconazol, itraconazol, voriconazol…</li>
+    <li>Paxlovid (thuốc điều trị COVID-19)</li>
+    <li>Carbamazepin, phenytoin, phenobarbital</li>
+    <li>Thuốc nam, thuốc bắc, thực phẩm chức năng; bưởi</li>
+    <li>Vaccine sống giảm độc lực</li></ul>
+    <div class="w-ok">Giảm đau, hạ sốt: paracetamol, tối đa 3 g/ngày</div>
+    <div class="w-dr">Bác sĩ điều trị: ${esc(p.drName || '—')}${p.drPhone ? ' · ' + esc(p.drPhone) : ''}</div></div>`;
+}
+
+/* ================= Lịch ================= */
+function renderSched() {
+  const p = cur(), el = $('#tab-sched'), day = diffDays(p.txDate, TODAY);
+  const lastD = p.entries.length ? p.entries[p.entries.length - 1].date : p.txDate, ref = lastD > TODAY ? lastD : TODAY;
+  const up = visitOffsets(Math.max(day, 0) + 500).map(d => { const x = addDays(p.txDate, d), w = pd(x).getDay(); return w === 6 ? addDays(x, 2) : w === 0 ? addDays(x, 1) : x; }).filter(d => d > ref).slice(0, 4);
+  const vrows = VAX.map(v => { const s = vaxStatus(p, v); const lv = { done: 'ok', due: 'warn', notyet: 'na', na: 'na' }[s.s]; const lab = { done: 'Đã tiêm', due: 'Đến hạn', notyet: 'Chưa đến lúc', na: 'Không áp dụng' }[s.s];
+    return `<div class="row"><div class="rm"><div class="rn">${esc(v.name)}</div><div class="rd">${esc(v.sched)}</div><div class="rd" style="margin-top:2px"><b>${esc(s.t)}</b></div></div><div class="stack" style="gap:6px;align-items:flex-end">${pill(lv, lab)}${s.s === 'due' ? `<button class="btn sm" type="button" data-ics="vax:${v.k}">Nhắc tôi</button>` : ''}${v.hbv ? '' : `<button class="btn sm" data-vax="${v.k}">Ghi nhận đã tiêm</button>`}</div>
+      <form class="vax-f" data-vf="${v.k}" hidden style="flex-basis:100%"><div class="unit"><label class="sr" for="vd-${v.k}">Ngày tiêm</label><input id="vd-${v.k}" type="date" max="${TODAY}" value="${TODAY}" style="min-height:42px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--surface)"><button class="btn sm primary" type="submit">Lưu</button></div></form></div>`; }).join('');
+  el.innerHTML = `<div class="page-h"><h1>Lịch</h1><p>Lịch tái khám, các mốc theo giai đoạn sau ghép và tiêm chủng.</p></div>
+  ${apptCard(p)}
+  <div class="card"><h2>Lịch tái khám theo giai đoạn</h2>
+    <div class="tbl-wrap"><table class="proto-tbl"><thead><tr><th>Giai đoạn</th><th>Tái khám</th></tr></thead><tbody>${PROTO.map(r => `<tr class="${day >= r.a && day <= r.b ? 'now' : ''}"><td>${r.t}${day >= r.a && day <= r.b ? ' · hiện tại' : ''}</td><td>${r.f}</td></tr>`).join('')}</tbody></table></div>
+    <p class="muted small" style="margin-top:8px">Theo lịch tái khám của khoa Thận – Lọc máu, BV Nhân dân 115. Ngày hẹn cụ thể do BS ghi sau mỗi lần khám.</p>
+    ${up.length ? `<h3 style="margin:14px 0 6px">Các mốc dự kiến tiếp theo</h3><div class="quick">${up.map(d => `<span class="chip">${WD[pd(d).getDay()]} ${fmtD(d)}</span>`).join('')}</div>` : ''}
+  </div>
+  <div class="card"><div class="card-h"><h2>Tiêm chủng</h2><span class="muted small">Vaccine bất hoạt thường bắt đầu từ tháng thứ 3 sau ghép</span></div><div class="rows">${vrows}</div></div>
+  <div class="card"><h2>Không tiêm vaccine sống giảm độc lực sau ghép</h2><ul class="live">${LIVE_VAX.map(x => `<li>${x}</li>`).join('')}</ul>
+    <p class="small" style="margin-top:8px">Người sống cùng nhà nên tiêm cúm hằng năm. Hỏi BS trước khi người nhà tiêm vaccine sống.</p></div>`;
+  el.onclick = ev => { const b = ev.target.closest('[data-vax]'); if (b) { const f = $(`[data-vf="${b.dataset.vax}"]`, el); f.hidden = !f.hidden; if (!f.hidden) $('input', f).focus(); } };
+  el.onsubmit = ev => { const f = ev.target.closest('[data-vf]'); if (!f) return; ev.preventDefault(); const d = $('input', f).value; if (!d) return; const k = f.dataset.vf; (p.vax[k] = p.vax[k] || []).push(d); save(); toast('Đã ghi nhận mũi tiêm'); renderSched(); };
+}
+
+/* ================= Hồ sơ ================= */
+const PF = [
+  ['hospitalId', 'Mã người bệnh (ID)', 'text'], ['name', 'Họ và tên', 'text'], ['sex', 'Giới', 'select', [['M', 'Nam'], ['F', 'Nữ']]], ['dob', 'Ngày sinh', 'date'],
+  ['txDate', 'Ngày ghép', 'date'], ['txNumber', 'Lần ghép', 'select', [['1', 'Lần 1'], ['2', 'Lần 2'], ['3', 'Lần 3']]], ['preemptive', 'Ghép đón đầu (chưa lọc máu)', 'select', [['no', 'Không'], ['yes', 'Có']]],
+  ['donorType', 'Nguồn tạng', 'select', [['LD', 'Người cho sống (LD)'], ['BDD', 'Người cho chết não (BDD)'], ['DCD', 'Người cho ngừng tuần hoàn (DCD)']]], ['related', 'Huyết thống', 'select', [['yes', 'Huyết thống'], ['no', 'Không huyết thống']]],
+  ['donorRelation', 'Quan hệ với người cho', 'text'], ['blood', 'Nhóm máu (cho → nhận)', 'text'],
+  ['hlaA', 'HLA-A mismatch', 'select', [[0, '0'], [1, '1'], [2, '2']]], ['hlaB', 'HLA-B mismatch', 'select', [[0, '0'], [1, '1'], [2, '2']]], ['hlaDR', 'HLA-DR mismatch', 'select', [[0, '0'], [1, '1'], [2, '2']]],
+  ['pra', 'PRA (%)', 'number'], ['dsa', 'DSA trước ghép', 'text'],
+  ['cmv', 'CMV (cho/nhận)', 'select', [['D+/R+', 'D+/R+'], ['D+/R−', 'D+/R− (nguy cơ cao)'], ['D−/R+', 'D−/R+'], ['D−/R−', 'D−/R−']]], ['ebv', 'EBV (cho/nhận)', 'select', [['D+/R+', 'D+/R+'], ['D+/R−', 'D+/R− (nguy cơ cao)'], ['D−/R+', 'D−/R+'], ['D−/R−', 'D−/R−']]],
+  ['induction', 'Thuốc dẫn nhập', 'text'], ['maint', 'Phác đồ duy trì', 'text'], ['tacOnce', 'Dạng tacrolimus', 'select', [['no', '2 lần/ngày'], ['yes', '1 lần/ngày (Advagraf, phóng thích kéo dài)']]], ['regimen', 'Phác đồ duy trì', 'select', Object.entries(REGIMENS)], ['regimenFrom', 'Bắt đầu phác đồ hiện tại từ ngày', 'date'], ['dm', 'Đái tháo đường', 'select', [['no', 'Không'], ['pre', 'Có từ trước ghép'], ['ptdm', 'Đái tháo đường sau ghép (PTDM)']]],
+  ['disDate', 'Ngày xuất viện sau ghép', 'date'], ['crDis', 'Creatinin lúc xuất viện (µmol/L)', 'number'], ['crAdj', 'Creatinin nền hiệu chỉnh khi DGF (µmol/L)', 'number'], ['crAdjDate', 'Áp dụng Cr nền hiệu chỉnh từ ngày', 'date'], ['cr1y', 'Creatinin 1 năm sau ghép (µmol/L)', 'number'], ['hba1cTgt', 'Mục tiêu HbA1c khi có ĐTĐ (%)', 'number'], ['drName', 'Bác sĩ điều trị', 'text'], ['drPhone', 'Số điện thoại BS điều trị', 'tel'], ['antiHBs', 'Anti-HBs gần nhất (mIU/mL)', 'number'], ['nextAppt', 'Ngày hẹn tái khám (BS ghi)', 'date'], ['nextNote', 'Ghi chú lần hẹn', 'text']
+];
+const PF_CORE = ['hospitalId', 'name', 'sex', 'dob', 'txDate', 'donorType', 'tacOnce', 'regimen', 'regimenFrom', 'dm', 'hba1cTgt', 'disDate', 'crDis', 'crAdj', 'crAdjDate', 'cr1y', 'drName', 'drPhone', 'nextAppt', 'nextNote'];
+function pfVal(p, k) {
+  const f = PF.find(x => x[0] === k), v = p[k];
+  if (v === '' || v == null) return k === 'hba1cTgt' ? '< 7 (mặc định)' : '—';
+  if (k === 'hba1cTgt') return '< ' + fmtN(+v, 1);
+  if (f[2] === 'select') { const o = f[3].find(o => String(o[0]) === String(v)); return o ? o[1] : v; }
+  if (f[2] === 'date') return fmtD(v);
+  return v;
+}
+function renderProfile() {
+  const p = cur(), el = $('#tab-profile');
+  const kv = keys => `<dl class="kv">${keys.map(k => `<div><dt>${PF.find(x => x[0] === k)[1]}</dt><dd>${esc(pfVal(p, k))}</dd></div>`).join('')}</dl>`;
+  const view = `<div class="card"><div class="card-h"><h2>Thông tin chính</h2><button class="btn sm" data-edit>Chỉnh sửa</button></div>
+      ${kv(PF_CORE)}<p class="muted small" style="margin-top:8px">${p.dob ? ageAt(p.dob, TODAY) + ' tuổi' : ''}</p>
+      <details class="add" style="margin-top:12px"><summary>Thông tin ghép chi tiết (không bắt buộc)</summary>${kv(PF.map(f => f[0]).filter(k => !PF_CORE.includes(k) && !k.startsWith('hla')))}
+      <div style="margin-top:12px"><div class="flabel" style="margin-bottom:4px">HLA mismatch (A / B / DR)</div><div class="hla"><span>A ${p.hlaA}</span><span>B ${p.hlaB}</span><span>DR ${p.hlaDR}</span><span><b>${(+p.hlaA) + (+p.hlaB) + (+p.hlaDR)}/6</b></span></div></div></details></div>`;
+  const fld = ([k, l, t, o]) => `<div class="field"><label for="pf-${k}">${l}</label>${t === 'select' ? `<select id="pf-${k}">${o.map(x => `<option value="${x[0]}"${String(x[0]) === String(p[k]) ? ' selected' : ''}>${x[1]}</option>`).join('')}</select>` : `<input id="pf-${k}" type="${t}" value="${esc(p[k] ?? '')}"${t === 'number' ? ' inputmode="decimal"' : ''}>`}</div>`;
+  const edit = `<form id="f-pf" class="card form" novalidate><div class="card-h"><h2>Chỉnh sửa hồ sơ</h2></div><div class="grid2">${PF.filter(f => PF_CORE.includes(f[0])).map(fld).join('')}</div>
+     <details class="add"><summary>Thông tin ghép chi tiết (không bắt buộc)</summary><div class="grid2">${PF.filter(f => !PF_CORE.includes(f[0])).map(fld).join('')}</div></details>
+     <p class="small" id="pf-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Lưu hồ sơ</button><button class="btn" type="button" data-cancel>Huỷ</button></div></form>`;
+  const reg = p.regimen || 'tac_mpa';
+  const SUB = { tac_mpa: 'Tac + MPA + methylprednisolon', tac_evr: 'khi phối hợp mTORi', tac_srl: 'khi phối hợp mTORi', evr: '+ CNI giảm liều', srl: '+ CNI giảm liều', srl_free: 'không CNI' };
+  const specs = [['tac', 'tt'], ['evr', 'te'], ['srl', 'ts']].map(([k, pre]) => ({ k, pre, key: tblKey(reg, k) })).filter(x => x.key);
+  const cell = (id, t, lab) => `<label class="sr" for="${id}">${lab}</label><input class="inp" id="${id}" type="text" inputmode="decimal" autocomplete="off" value="${rangeVal(t)}" placeholder="phác đồ" style="min-height:40px;min-width:78px">`;
+  const rowsT = (pre, t) => PERIODS.map((_, i) => `<td>${cell(pre + i, t[i], PERIOD_LB[i])}</td>`).join('');
+  const notes = { tac_mpa: 'Nguy cơ miễn dịch cao có thể cần khung cao hơn; tránh áp dụng máy móc.', tac_evr: 'Phác đồ khoa: everolimus 5–10 ng/mL trong 6 tháng đầu kể từ khi bắt đầu everolimus, sau đó 3–8 ng/mL. Nhớ ghi ngày bắt đầu phác đồ. Khung Tac 2–5 chỉ áp dụng khi everolimus đã đạt mục tiêu. Phác đồ everolimus không CNI có khung khác, thường cao hơn.', tac_srl: 'Khung Tac 2–5 chỉ áp dụng khi sirolimus đã đạt mục tiêu. Tránh mTORi rất sớm sau ghép (lành vết thương); chú ý đạm niệu, lipid.', srl_free: 'Slide ghi sirolimus 5–10/15: app hiểu 5–15 khi không CNI ở 1–12 tháng, 5–10 sau 12 tháng. Tránh mTORi rất sớm sau ghép; chú ý đạm niệu, lipid.' };
+  const tgt = `<div class="card"><h2>Khung nồng độ đích (ng/mL)</h2>
+    <p class="small" style="margin-bottom:6px">Phác đồ: <b>${esc(REGIMENS[reg])}</b>${reg !== 'tac_mpa' && p.regimenFrom ? ` từ ${fmtD(p.regimenFrom)}` : ''}. Ô trống = theo phác đồ khoa.</p>
+    <form id="f-tgt" class="stack" novalidate><div class="tbl-wrap"><table class="proto-tbl"><thead><tr><th>Thuốc</th>${PERIOD_LB.map(l => `<th>${l}</th>`).join('')}</tr></thead><tbody>
+    ${specs.filter(x => x.k !== 'evr').map(x => `<tr><td><b>${x.k === 'tac' ? 'Tac' : DRUG[x.k]} C0</b><br><span class="small muted">${SUB[x.key]}</span></td>${rowsT(x.pre, tblFor(p, x.key))}</tr>`).join('')}</tbody></table></div>
+    ${specs.some(x => x.k === 'evr') ? `<div class="tbl-wrap"><table class="proto-tbl"><thead><tr><th>Thuốc</th>${EVR_LB.map(l => `<th>${l}</th>`).join('')}</tr></thead><tbody><tr><td><b>Everolimus C0</b><br><span class="small muted">tính từ ngày bắt đầu everolimus${p.regimenFrom ? ' (' + fmtD(p.regimenFrom) + ')' : ''}</span></td>${EVR_LB.map((l, i) => `<td>${cell('te' + i, tblFor(p, 'evr')[i], l)}</td>`).join('')}</tr></tbody></table></div>` : ''}
+    <p class="small muted">${notes[reg] || ''} Nguồn: ${esc(TGT_SRC)}.</p>
+    <p class="small" id="tgt-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Lưu khung đích</button></div></form></div>`;
+  const sec = `<div class="card"><h2>Bảo mật và sao lưu</h2>
+    <p class="small">Dữ liệu chỉ lưu trên điện thoại này, không gửi về bệnh viện hay bất kỳ máy chủ nào.</p>
+    <form id="f-pin" class="unit" style="margin-top:12px" novalidate><label class="sr" for="pin-new">Mã PIN mới</label><input id="pin-new" class="inp" type="password" inputmode="numeric" maxlength="4" autocomplete="new-password" placeholder="${S.pin ? 'Mã PIN mới (4 số)' : 'Đặt mã PIN (4 số)'}"><button class="btn" type="submit">${S.pin ? 'Đổi PIN' : 'Đặt PIN'}</button></form>
+    <p class="small" id="pin-err" style="color:var(--crit);font-weight:600;margin-top:6px" hidden>Mã PIN gồm đúng 4 chữ số.</p>
+    <p class="small" style="margin-top:6px">${S.pin ? 'Khoá PIN đang bật: sổ tự khoá khi mở lại và khi rời app hơn 2 phút.' : 'Khoá PIN đang tắt.'} Mã PIN giúp người khác cầm điện thoại không xem được sổ. Quên PIN: chọn "Quên mã PIN" ở màn hình khoá để xoá dữ liệu trên máy, rồi khôi phục từ file sao lưu (file sao lưu không chứa mã PIN).</p>
+    <div class="actions" style="margin-top:12px">${S.pin ? '<button class="btn danger" type="button" data-pinoff>Tắt khoá PIN</button><button class="btn" type="button" data-lock>Khoá ngay</button>' : ''}<button class="btn" type="button" data-export>Xuất file sao lưu</button><label class="btn" for="imp-file">Nhập từ file sao lưu</label><input id="imp-file" type="file" accept=".json,application/json" hidden></div>
+    ${UI.pendingImport ? `<div class="alert warn" style="margin-top:12px"><span class="ai" aria-hidden="true">${IC.warn}</span><div><p class="am">File sao lưu hợp lệ: ${UI.pendingImport.patients.length} hồ sơ</p><p class="aa">Dữ liệu hiện tại trên máy sẽ được thay bằng dữ liệu trong file.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-import-ok>Thay bằng dữ liệu từ file</button><button class="btn sm" type="button" data-import-cancel>Huỷ</button></div></div></div>` : ''}
+    <p class="muted small" style="margin-top:10px">Lần sao lưu gần nhất: <b>${S.lastBackup ? fmtD(S.lastBackup) : 'chưa có'}</b>. App nhắc sao lưu sau mỗi lần tái khám (tháng 1: mỗi tuần, tháng 2: mỗi 2 tuần, từ tháng 3: mỗi tháng). Gửi file vào Zalo "Cloud của tôi" hoặc Google Drive; khi đổi điện thoại, chọn "Nhập từ file sao lưu".</p></div>`;
+  const bx = p.biopsies.slice().sort((a, b) => a.date < b.date ? 1 : -1), evs = p.events.slice().sort((a, b) => a.date < b.date ? 1 : -1);
+  el.innerHTML = `<div class="page-h"><h1>Hồ sơ</h1><p>Thông tin cơ bản, thông tin ghép, sinh thiết và biến cố sau ghép.</p></div>
+  ${UI.editProfile ? edit : view}
+  ${tgt}
+  ${sec}
+  <div class="card"><div class="card-h"><h2>Sinh thiết thận ghép</h2><span class="muted small">${bx.length} lần</span></div>
+    <div class="rows">${bx.length ? bx.map(b => `<div class="row"><div class="rm"><div class="rn">${fmtD(b.date)} · ${esc(BANFF[b.banff] || '')}${b.grade ? ' · ' + esc(b.grade) : ''}</div><div class="rd">${b.ind === 'quytrinh' ? 'Sinh thiết theo quy trình' : 'Sinh thiết theo chỉ định'}. ${esc(b.detail)}</div>${b.tx ? `<div class="rd">Xử trí: ${esc(b.tx)}</div>` : ''}${b.file ? `<div style="margin-top:8px"><button class="btn sm" type="button" data-fview="${esc(b.file.id)}">${/pdf/.test(b.file.type) ? 'Xem file PDF' : 'Xem ảnh'}: ${esc(b.file.name)}</button> <span class="muted small">${fmtSize(b.file.size)}</span></div>` : ''}</div><button class="btn sm danger" data-delb="${b.id}">Xoá</button></div>`).join('') : '<p class="muted">Chưa có lần sinh thiết nào.</p>'}</div>
+    <details class="add" style="margin-top:12px"><summary>Thêm kết quả sinh thiết</summary><form id="f-bx" class="form" novalidate><div class="grid2">
+      <div class="field"><label for="b-date">Ngày sinh thiết</label><input id="b-date" type="date" max="${TODAY}" required></div>
+      <div class="field"><label for="b-ind">Chỉ định</label><select id="b-ind"><option value="chidinh">Theo chỉ định (có bất thường)</option><option value="quytrinh">Theo quy trình</option></select></div>
+      <div class="field"><label for="b-banff">Kết luận (phân loại Banff)</label><select id="b-banff">${Object.entries(BANFF).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div class="field"><label for="b-grade">Mức độ</label><input id="b-grade" placeholder="Ví dụ: IA, IB, IIA, độ I"></div>
+      <div class="field"><label for="b-detail">Mô tả</label><textarea id="b-detail" rows="2" placeholder="Điểm Banff, C4d, SV40…"></textarea></div>
+      <div class="field"><label for="b-tx">Xử trí</label><textarea id="b-tx" rows="2"></textarea></div>
+      <div class="field" id="w-b-file"><label for="b-file">File kết quả giải phẫu bệnh <span class="muted">(PDF hoặc ảnh, tối đa 10 MB)</span></label><input id="b-file" type="file" accept="application/pdf,image/*"><small>File chỉ lưu trên điện thoại này và được đưa vào file sao lưu.</small><small class="err" hidden></small></div>
+    </div><div class="actions"><button class="btn primary" type="submit">Lưu sinh thiết</button></div></form></details></div>
+  <div class="card"><div class="card-h"><h2>Biến cố sau ghép</h2><span class="muted small">${evs.filter(e => e.hosp === 'yes').length} lần nhập viện</span></div>
+    <div class="rows">${evs.length ? evs.map(v => `<div class="row"><div class="rm"><div class="rn">${fmtD(v.date)} · ${esc(EVT[v.type] || '')}</div><div class="rd">${esc(v.detail)}</div><div style="margin-top:4px">${v.hosp === 'yes' ? pill('crit', 'Nhập viện' + (v.end ? ` ${fmtDs(v.date)}–${fmtDs(v.end)}` : '')) : pill('na', 'Không nhập viện')}</div></div><button class="btn sm danger" data-dele="${v.id}">Xoá</button></div>`).join('') : '<p class="muted">Chưa ghi nhận biến cố.</p>'}</div>
+    <details class="add" style="margin-top:12px"><summary>Thêm biến cố</summary><form id="f-ev" class="form" novalidate><div class="grid2">
+      <div class="field"><label for="v-type">Loại biến cố</label><select id="v-type">${Object.entries(EVT).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select></div>
+      <div class="field"><label for="v-hosp">Nhập viện</label><select id="v-hosp"><option value="yes">Có</option><option value="no">Không</option></select></div>
+      <div class="field"><label for="v-date">Từ ngày</label><input id="v-date" type="date" max="${TODAY}" required></div>
+      <div class="field"><label for="v-end">Đến ngày (ra viện)</label><input id="v-end" type="date"></div>
+    </div><div class="field"><label for="v-detail">Mô tả</label><textarea id="v-detail" rows="2" placeholder="Chẩn đoán, điều trị chính"></textarea></div><div class="actions"><button class="btn primary" type="submit">Lưu biến cố</button></div></form></details></div>
+  ${PWA && !DEMO ? `<div class="card"><h2>Về sổ</h2><p class="small">Sổ theo dõi sau ghép thận · phiên bản ${APP_VER}. Dữ liệu chỉ lưu trên điện thoại này, không gửi đi đâu. Sổ không thay thế việc khám bệnh; khi có cảnh báo đỏ, hãy liên hệ BS điều trị.</p><div class="actions" style="margin-top:10px"><a class="btn" href="?demo=1">Mở chế độ dùng thử (dữ liệu mẫu)</a></div></div>` : `<div class="card"><h2>${PWA ? 'Chế độ dùng thử' : 'Bản mẫu'}</h2>${PWA ? '<div class="actions" style="margin-bottom:10px"><a class="btn primary" href="./">Thoát chế độ dùng thử</a></div>' : ''}<p class="small" style="margin-bottom:10px">Ba người bệnh mẫu là dữ liệu giả để duyệt giao diện. Ngưỡng cảnh báo, khung FK, lịch tái khám và danh sách tương tác là bản nháp chờ BS duyệt.</p>
+    <p class="small" style="margin-bottom:10px">Bản phát hành: mỗi điện thoại một người bệnh. Ô chọn người bệnh ở đầu trang chỉ có trong bản mẫu.</p>
+    <div class="actions"><button class="btn" data-new>Tạo sổ mới (trống)</button><button class="btn danger" data-reset>Khôi phục dữ liệu mẫu</button>${S.patients.length > 1 ? '<button class="btn danger" data-delp>Xoá người bệnh này</button>' : ''}</div>
+    <h3 style="margin:14px 0 6px">Tài liệu tham khảo cho bản nháp</h3><ul class="refs">
+      <li>KDIGO Clinical Practice Guideline for the Care of Kidney Transplant Recipients (2009).</li>
+      <li>KDIGO Clinical Practice Guideline for the Management of Blood Pressure in CKD (2021).</li>
+      <li>Inker LA, et al. New creatinine- and cystatin C–based equations to estimate GFR without race. N Engl J Med 2021.</li>
+      <li>Danziger-Isakov L, Kumar D. Vaccination of solid organ transplant candidates and recipients: AST IDCOP guidelines. Clin Transplant 2019.</li></ul></div>`}`;
+
+  el.onclick = ev => {
+    const t = ev.target;
+    if (t.closest('[data-edit]')) { UI.editProfile = true; renderProfile(); return; }
+    if (t.closest('[data-cancel]')) { UI.editProfile = false; renderProfile(); return; }
+    if (t.closest('[data-new]')) { newPatient(); return; }
+    if (t.closest('[data-import-ok]')) { const o = UI.pendingImport; UI.pendingImport = null; const ofs = o.files || []; delete o.files; ofs.forEach(f => { try { fput({ id: f.id, name: f.name, type: f.type, size: f.size, date: f.date, blob: blobOf(f.data, f.type) }); } catch (e) { } }); S = Object.assign(o, { pin: S.pin, v: 6 }); S.patients.forEach(x => { normTbl(x); if (!x.regimen) x.regimen = x.useEvr === 'yes' ? 'tac_evr' : 'tac_mpa'; if (x.regimenFrom == null) x.regimenFrom = ''; if (!x.dm) x.dm = 'no'; if (!REGIMENS[x.regimen]) x.regimen = 'tac_mpa'; if (!has(x.crDis) && has(x.baseCr)) x.crDis = x.baseCr; }); if (!S.patients.some(x => x.id === S.cur)) S.cur = S.patients[0].id; save(); renderSelect(); toast('Đã khôi phục từ file sao lưu'); setTab('home'); return; }
+    if (t.closest('[data-import-cancel]')) { UI.pendingImport = null; renderProfile(); return; }
+    if (t.closest('[data-lock]')) { showLock(); return; }
+    const po = t.closest('[data-pinoff]'); if (po) { if (!armConfirm(po, 'Xác nhận tắt PIN')) return; S.pin = ''; save(); toast('Đã tắt khoá PIN'); renderProfile(); return; }
+    const rs = t.closest('[data-reset]'); if (rs) { if (!armConfirm(rs, 'Bấm lần nữa để khôi phục')) return; S = seed(); save(); UI.editProfile = false; renderSelect(); toast('Đã khôi phục dữ liệu mẫu'); setTab('home'); return; }
+    const dp = t.closest('[data-delp]'); if (dp) { if (!armConfirm(dp, 'Xác nhận xoá người bệnh')) return; S.patients = S.patients.filter(x => x.id !== p.id); S.cur = S.patients[0].id; save(); renderSelect(); toast('Đã xoá người bệnh'); setTab('home'); return; }
+    const db = t.closest('[data-delb]'); if (db) { if (!armConfirm(db, 'Xác nhận xoá')) return; const ob = p.biopsies.find(x => x.id === db.dataset.delb); if (ob && ob.file) fdel(ob.file.id); p.biopsies = p.biopsies.filter(x => x.id !== db.dataset.delb); save(); renderProfile(); return; }
+    const de = t.closest('[data-dele]'); if (de) { if (!armConfirm(de, 'Xác nhận xoá')) return; p.events = p.events.filter(x => x.id !== de.dataset.dele); save(); renderProfile(); return; }
+  };
+  $('#imp-file').onchange = ev => {
+    const file = ev.target.files[0]; if (!file) return; const rd = new FileReader();
+    rd.onload = () => { try { const o = JSON.parse(rd.result); if (o && o.v >= 2 && Array.isArray(o.patients) && o.patients.length) { UI.pendingImport = o; renderProfile(); } else toast('File không đúng định dạng sao lưu của Sổ Thận Ghép.'); } catch (e) { toast('Không đọc được file. Hãy chọn đúng file sao lưu (.json).'); } };
+    rd.readAsText(file);
+  };
+  el.onsubmit = async ev => {
+    ev.preventDefault(); const f = ev.target;
+    if (f.id === 'f-tgt') {
+      const read = pre => (pre === 'te' ? EVR_LB : PERIODS).map((_, i) => parseRange($('#' + pre + i).value));
+      const bad = t => t.some(r => r === 'err');
+      const vals = specs.map(x => [x.key, read(x.pre)]);
+      if (vals.some(([, t]) => bad(t))) { const er = $('#tgt-err'); er.textContent = 'Ghi mỗi ô theo dạng 6-8 (số nhỏ trước, số lớn sau), hoặc để trống = theo phác đồ khoa.'; er.hidden = false; return; }
+      p.tbl = p.tbl || JSON.parse(JSON.stringify(DEF_TBL)); vals.forEach(([k, t]) => { p.tbl[k] = t; }); save(); toast('Đã lưu khung đích'); renderProfile(); return;
+    }
+    if (f.id === 'f-pin') { const v = $('#pin-new').value; if (!/^\d{4}$/.test(v)) { $('#pin-err').hidden = false; return; } S.pin = await hashPin(v); save(); toast('Đã đặt mã PIN'); renderProfile(); return; }
+    if (f.id === 'f-pf') {
+      const n = {}; PF.forEach(([k, , t]) => { let v = $('#pf-' + k).value; if (t === 'number') v = v === '' ? '' : +v; if (k.startsWith('hla')) v = +v; n[k] = v; });
+      const er = $('#pf-err');
+      if (!n.name || !n.dob || !n.txDate) { er.textContent = 'Cần có họ tên, ngày sinh và ngày ghép.'; er.hidden = false; return; }
+      if (!has(n.crDis)) { er.textContent = 'Cần nhập creatinin lúc xuất viện để app tính cảnh báo creatinin.'; er.hidden = false; return; }
+      if ([n.crDis, n.cr1y, n.crAdj].some(v => has(v) && !(v >= 20 && v <= 1500))) { er.textContent = 'Creatinin cần trong khoảng 20–1500 µmol/L.'; er.hidden = false; return; }
+      if (has(n.hba1cTgt) && !(n.hba1cTgt >= 5 && n.hba1cTgt <= 10)) { er.textContent = 'Mục tiêu HbA1c cần trong khoảng 5–10%.'; er.hidden = false; return; }
+      Object.assign(p, n); delete S.fresh; save(); UI.editProfile = false; renderSelect(); toast('Đã lưu hồ sơ'); renderProfile();
+    } else if (f.id === 'f-bx') {
+      const d = $('#b-date').value; if (!d) { $('#b-date').focus(); return; }
+      const fl = $('#b-file').files[0], fe = $('#w-b-file .err'); let fm = null;
+      if (fl) {
+        if (!/pdf$|^image\//.test(fl.type) && !/\.pdf$/i.test(fl.name)) { fe.textContent = 'Chỉ nhận file PDF hoặc ảnh.'; fe.hidden = false; return; }
+        if (fl.size > 10 * 1048576) { fe.textContent = `File ${fmtSize(fl.size)}, vượt quá 10 MB. Hãy chụp ảnh hoặc nén file nhỏ hơn.`; fe.hidden = false; return; }
+        fm = { id: 'f' + uid(), name: fl.name, type: fl.type || 'application/pdf', size: fl.size };
+        try { await fput(Object.assign({}, fm, { date: TODAY, blob: fl })); } catch (e) { fe.textContent = 'Trình xem này không cho lưu file trên máy. Kết quả sinh thiết vẫn được lưu, chưa kèm file.'; fe.hidden = false; fm = null; }
+      }
+      p.biopsies.push({ id: uid(), date: d, ind: $('#b-ind').value, banff: $('#b-banff').value, grade: $('#b-grade').value.trim(), detail: $('#b-detail').value.trim(), tx: $('#b-tx').value.trim(), file: fm }); save(); toast(fm ? 'Đã lưu sinh thiết kèm file' : 'Đã lưu sinh thiết'); renderProfile();
+    } else if (f.id === 'f-ev') {
+      const d = $('#v-date').value; if (!d) { $('#v-date').focus(); return; }
+      p.events.push({ id: uid(), date: d, end: $('#v-end').value, type: $('#v-type').value, hosp: $('#v-hosp').value, detail: $('#v-detail').value.trim() }); save(); toast('Đã lưu biến cố'); renderProfile();
+    }
+  };
+}
+function newPatient() {
+  const p = basePatient({ demo: false, name: '', txDate: TODAY, nextAppt: '' });
+  S.patients.push(p); S.cur = p.id; save(); renderSelect(); UI.editProfile = true; setTab('profile');
+}
+
+/* ================= Khởi động ================= */
+$('#pt-select').addEventListener('change', e => {
+  if (e.target.value === '__new') { newPatient(); return; }
+  S.cur = e.target.value; save(); UI.saved = null; UI.editProfile = false; render();
+});
+$$('.tabbar button').forEach(b => b.addEventListener('click', () => { if (b.dataset.tab !== 'entry') UI.saved = null; setTab(b.dataset.tab); }));
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (UI.tab === 'charts' && UI.view === 'chart') renderCharts(); }, 150); });
+async function hashPin(pin) { try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('stg:' + pin)); return Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, '0')).join(''); } catch (e) { return 'p:' + pin; } }
+function showLock() { const L = $('#lock'); L.hidden = false; $('#lock-in').value = ''; $('#lock-err').hidden = true; setTimeout(() => $('#lock-in').focus(), 60); }
+$('#lock-f').addEventListener('submit', async ev => { ev.preventDefault(); const v = $('#lock-in').value; if ((await hashPin(v)) === S.pin) { $('#lock').hidden = true; } else { $('#lock-err').hidden = false; $('#lock-in').value = ''; $('#lock-in').focus(); } });
+$('#lock-wipe').addEventListener('click', ev => { if (!armConfirm(ev.currentTarget, 'Bấm lần nữa để xoá')) return; fall().then(fs => fs.forEach(f => fdel(f.id))); S = freshState(); save(); $('#lock').hidden = true; renderSelect(); setTab('home'); toast('Đã xoá dữ liệu trên máy này'); });
+let hiddenAt = 0;
+document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); else if (S.pin && hiddenAt && Date.now() - hiddenAt > 120000) showLock(); });
+document.addEventListener('click', ev => {
+  if (ev.target.closest('[data-export]')) { backupNow(); return; }
+  const vf = ev.target.closest('[data-fview]'); if (vf) { showFile(vf.dataset.fview); return; }
+  const sf = ev.target.closest('[data-fsave]'); if (sf) { fget(sf.dataset.fsave).then(r => r ? saveFile(r.name.replace(/[\\/:*?"<>|]/g, '_'), r.blob) : 'missing').then(x => toast(x === 'saved' ? 'Đã lưu file về máy' : x === 'declined' ? 'Đã huỷ' : x === 'missing' ? 'Không tìm thấy file' : 'Trình xem này chưa cho phép lưu file')); return; }
+  const c = ev.target.closest('[data-copy]');
+  if (c) { const fail = () => toast('Không sao chép được. Hãy giữ ngón tay trên số để chọn và sao chép.'); try { navigator.clipboard.writeText(c.dataset.copy).then(() => toast('Đã sao chép số điện thoại'), fail); } catch (e) { fail(); } return; }
+  const i = ev.target.closest('[data-ics]');
+  if (i) {
+    const p = cur(), evs = icsFor(p, i.dataset.ics); if (!evs.length) { toast('Chưa có thông tin để tạo lịch nhắc.'); return; }
+    if (PWA) { saveFile(`nhac-${i.dataset.ics.replace(/[^a-z0-9]/gi, '-')}.ics`, buildICS(evs)).then(r => toast(r === 'saved' ? 'Mở file vừa tải để thêm lịch nhắc vào ứng dụng Lịch' : 'Không tạo được file lịch nhắc')); return; }
+    openSheet(`<h2>Lịch nhắc sẽ được thêm</h2><ul>${evs.map(e => `<li><b>${esc(e.title)}</b>${e.time ? ' · ' + e.time + ' mỗi ngày' : ' · ' + fmtD(e.date)}${e.sub ? `<br><span class="small muted">${esc(e.sub)}</span>` : ''}</li>`).join('')}</ul><p class="small">Ở bản phát hành, nút này thêm các lịch nhắc trên vào ứng dụng Lịch của điện thoại (định dạng lịch chuẩn .ics). Điện thoại tự báo đúng giờ, kể cả khi không mở sổ.</p><p class="small muted">Bản mẫu trên claude.ai chỉ hiển thị danh sách để duyệt nội dung nhắc.</p>`);
+    return;
+  }
+  if (ev.target.closest('[data-close]') || ev.target.id === 'sheet') closeSheet();
+});
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !$('#sheet').hidden) closeSheet(); });
+if (PWA) {
+  const pr = document.querySelector('.proto div'); if (pr) pr.textContent = DEMO ? 'Chế độ dùng thử · Dữ liệu mẫu, không phải người bệnh thật.' : 'Dữ liệu chỉ lưu trên điện thoại này · Sổ không thay thế việc khám bệnh.';
+  if (!DEMO) { const pk = document.querySelector('.pt-pick'); if (pk) pk.hidden = true; }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
+}
+renderSelect(); setTab('home');
+if (S.pin) showLock();
+</script></body></html>
