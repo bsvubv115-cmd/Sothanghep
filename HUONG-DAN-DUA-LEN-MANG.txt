@@ -1,5 +1,5 @@
 SỔ THẬN GHÉP – BẢN PHÁT HÀNH (PWA) – HƯỚNG DẪN ĐƯA LÊN MẠNG
-Phiên bản 1.0-thu-nghiem · 08/10/2026
+Phiên bản 1.1-thu-nghiem · 08/10/2026
 
 1. THƯ MỤC NÀY GỒM
    index.html              Toàn bộ app (một file)
@@ -9,6 +9,8 @@ Phiên bản 1.0-thu-nghiem · 08/10/2026
 
    App KHÔNG có máy chủ dữ liệu, KHÔNG có cơ sở dữ liệu. Máy chủ web chỉ phát file app;
    dữ liệu người bệnh chỉ nằm trên điện thoại của người bệnh và không bao giờ gửi lên máy chủ.
+   App không tải gì từ máy chủ bên ngoài (phông chữ đã đóng gói sẵn trong index.html).
+   Khi người bệnh đặt mã PIN, dữ liệu trên máy được mã hoá AES-GCM 256 bit (khoá dẫn xuất từ PIN, PBKDF2-SHA-256).
 
 2. YÊU CẦU DUY NHẤT: địa chỉ HTTPS
    Chỉ cần đưa nguyên 8 file này vào một thư mục trên máy chủ web tĩnh có HTTPS.
@@ -39,5 +41,5 @@ Phiên bản 1.0-thu-nghiem · 08/10/2026
 
 6. NHỮNG GÌ CÒN PHẢI LÀM TRƯỚC KHI DÙNG CHO NGƯỜI BỆNH THẬT
    - Hội đồng đạo đức chấp thuận; dược sĩ lâm sàng duyệt danh mục tương tác thuốc.
-   - (Đề xuất) Mã hoá dữ liệu trên máy bằng mã PIN.
    - Chạy thử nội bộ theo "Bảng kiểm chạy thử nội bộ" và sửa lỗi.
+   (Đã xong ở bản 1.1: mã hoá dữ liệu bằng mã PIN; nút "Xoá toàn bộ dữ liệu trên máy này"; phông chữ đóng gói sẵn.)
