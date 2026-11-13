@@ -1,7 +1,9 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8">
+<!DOCTYPE html>
+<!-- saved from url=(0043)file:///C:/Users/lethi/Downloads/index.html -->
+<html lang="vi"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b6652"><meta name="description" content="Sổ theo dõi sau ghép thận – dữ liệu chỉ lưu trên điện thoại người bệnh">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="file:///C:/Users/lethi/Downloads/manifest.webmanifest"><link rel="icon" href="file:///C:/Users/lethi/Downloads/icon-192.png"><link rel="apple-touch-icon" href="file:///C:/Users/lethi/Downloads/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Sổ Thận Ghép"><meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Theo dõi sau ghép thận</title>
 <style>
@@ -314,6 +316,14 @@ dl.kv dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
 @media (min-width:600px){.sheet{align-items:center}}
 .sheet-in{background:var(--surface);color:var(--ink);border-radius:16px;padding:18px;max-width:560px;width:100%;max-height:90%;overflow:auto;display:flex;flex-direction:column;gap:12px}
 .sheet-in ul{margin:0;padding-left:18px}
+.lock{overflow-y:auto}
+.lock-in input::placeholder{letter-spacing:0;font-size:1rem}
+.lock-in .pin2{display:flex;flex-direction:column;gap:10px;align-items:center}
+.inapp-box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;font-size:.95rem;line-height:1.5;width:100%}
+.inapp-box ol{margin:6px 0 0 18px;padding:0}
+.inapp-link{font-size:.85rem;word-break:break-all;color:var(--muted)}
+.auto-note{font-size:.85rem;color:var(--muted)}
+.field.bad select,.field.bad textarea{border-color:var(--crit)}
 .lock{position:fixed;inset:0;z-index:60;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
 .lock-in{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;max-width:320px;width:100%}
 .lock-in input{width:190px;text-align:center;font-size:1.6rem;letter-spacing:.5em;min-height:56px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
@@ -336,43 +346,94 @@ dl.kv dd{margin:2px 0 0;font-weight:600;overflow-wrap:anywhere}
 <header class="top">
   <div class="top-in">
     <div class="brand">
-      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"/></svg>
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"></rect><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"></path></svg>
       <div><b>Sổ Thận Ghép</b><span>Theo dõi sau ghép thận</span></div>
     </div>
-    <div class="pt-pick"><label class="sr" for="pt-select">Chọn người bệnh</label><select id="pt-select"></select></div>
+    <div class="pt-pick" hidden=""><label class="sr" for="pt-select">Chọn người bệnh</label><select id="pt-select"><option value="923fuj48" selected="">Người bệnh mới</option><option value="__new">+ Thêm người bệnh mới</option></select></div>
   </div>
-  <div class="proto"><div>Bản mẫu · Dữ liệu giả · Ngưỡng cảnh báo tạm thời, chờ bác sĩ duyệt. Dữ liệu chỉ lưu trên trình duyệt của máy này.</div></div>
+  <div class="proto"><div>Dữ liệu chỉ lưu trên điện thoại này · Sổ không thay thế việc khám bệnh.</div></div>
 </header>
 
 <main id="main">
-  <section id="tab-home" class="tab" aria-label="Tổng quan"></section>
-  <section id="tab-entry" class="tab" aria-label="Nhập kết quả" hidden></section>
-  <section id="tab-charts" class="tab" aria-label="Diễn tiến" hidden></section>
-  <section id="tab-meds" class="tab" aria-label="Thuốc" hidden></section>
-  <section id="tab-sched" class="tab" aria-label="Lịch" hidden></section>
-  <section id="tab-profile" class="tab" aria-label="Hồ sơ" hidden></section>
+  <section id="tab-home" class="tab" aria-label="Tổng quan">
+  <div class="card"><div class="card-h"><h2>Cài sổ lên màn hình chính</h2><button class="btn sm" type="button" data-install-x="">Để sau</button></div>
+    <p class="small">Trên Android: mở bằng <b>Chrome</b> → bấm <b>⋮</b> góc trên → chọn <b>Thêm vào màn hình chính</b> (hoặc <b>Cài đặt ứng dụng</b>).</p>
+    <p class="small muted" style="margin-top:6px">Cài lên màn hình chính giúp mở nhanh, dùng được khi không có mạng và giữ dữ liệu an toàn hơn.</p></div><div class="card"><div class="alert info"><span class="ai" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 10.5v8M12 5.5v.01"></path></svg></span><div><p class="am">Chào mừng đến với sổ theo dõi sau ghép thận</p><p class="aa">Bước đầu tiên: nhập hồ sơ (ngày ghép, ngày xuất viện, creatinin lúc xuất viện, phác đồ thuốc, số điện thoại BS điều trị). Nên làm cùng BS hoặc điều dưỡng trước khi xuất viện.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-go-edit="">Nhập hồ sơ</button></div></div></div></div>
+  <div class="card hero">
+    <div class="day-badge" aria-hidden="true"><b>0</b><span>ngày</span></div>
+    <div style="min-width:0"><h1>Người bệnh mới</h1>
+      <p class="muted small">Chưa có mã · Ngày thứ 0 sau ghép · tháng thứ 1</p>
+      <div class="chips"><span class="chip">Ghép lần 1</span><span class="chip">LD</span><span class="chip">Huyết thống</span><span class="chip">Ghép ngày 13/11/2026</span></div>
+    </div>
+  </div>
+
+  <div class="card"><div class="card-h"><h2>Cảnh báo hiện tại</h2></div><div class="stack"><div class="alert info" role="note"><span class="ai" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 10.5v8M12 5.5v.01"></path></svg></span><div style="min-width:0">
+    <div class="at"><span class="lvl">Thông tin</span></div>
+    <p class="am">1 mũi tiêm chủng đến hạn</p><p class="aa">Xem mục Lịch › Tiêm chủng và hỏi BS khi tái khám.</p></div></div></div>
+    
+  </div>
+
+  
+  <div class="tiles"><div class="tile"><div class="tl">Creatinin</div>
+     <div class="ts">Chưa có số liệu</div></div><div class="tile"><div class="tl">eGFR</div>
+     <div class="ts">Chưa có số liệu</div></div><div class="tile"><div class="tl">Tacrolimus C0</div>
+     <div class="ts">Chưa có số liệu</div></div><div class="tile"><div class="tl">Huyết áp</div>
+     <div class="ts">Chưa có số liệu</div></div></div>
+  <div class="actions"><button class="btn primary" data-go="entry">Nhập kết quả mới</button><button class="btn" data-go="charts">Xem diễn tiến</button></div>
+
+  
+  <div class="card"><h2>Lần tái khám tới</h2><p class="muted">Chưa có ngày hẹn. Thêm ngày hẹn BS ghi trong mục Hồ sơ.</p></div>
+  <div class="card"><h2>Thuốc hôm nay</h2><p class="muted">Chưa có thuốc. Thêm thuốc trong mục Thuốc.</p></div>
+  <div class="card"><div class="contact"><div><div class="flabel">Bác sĩ điều trị</div><p class="small">Chưa có số điện thoại bác sĩ điều trị. Thêm trong mục Hồ sơ.</p></div><button class="btn sm" type="button" data-go="profile">Thêm số BS</button></div></div></section>
+  <section id="tab-entry" class="tab" aria-label="Nhập kết quả" hidden=""></section>
+  <section id="tab-charts" class="tab" aria-label="Diễn tiến" hidden=""></section>
+  <section id="tab-meds" class="tab" aria-label="Thuốc" hidden=""></section>
+  <section id="tab-sched" class="tab" aria-label="Lịch" hidden=""></section>
+  <section id="tab-profile" class="tab" aria-label="Hồ sơ" hidden=""></section>
 </main>
 
 <nav class="tabbar" aria-label="Điều hướng chính">
   <div class="tabbar-in">
-    <button type="button" data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Tổng quan</button>
-    <button type="button" data-tab="entry" class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>Nhập</button>
-    <button type="button" data-tab="charts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>Diễn tiến</button>
-    <button type="button" data-tab="meds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"/><path d="M9.6 8.6l4.8 6.8"/></svg>Thuốc</button>
-    <button type="button" data-tab="sched"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch</button>
-    <button type="button" data-tab="profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"/></svg>Hồ sơ</button>
+    <button type="button" data-tab="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg>Tổng quan</button>
+    <button type="button" data-tab="entry" class="plus" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 6v12M6 12h12"></path></svg>Nhập</button>
+    <button type="button" data-tab="charts" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"></path><path d="M7 15l4-5 3 3 5-7"></path></svg>Diễn tiến</button>
+    <button type="button" data-tab="meds" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="8" width="19" height="8" rx="4" transform="rotate(-35 12 12)"></rect><path d="M9.6 8.6l4.8 6.8"></path></svg>Thuốc</button>
+    <button type="button" data-tab="sched" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>Lịch</button>
+    <button type="button" data-tab="profile" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c1-4 4.5-6 8-6s7 2 8 6"></path></svg>Hồ sơ</button>
   </div>
 </nav>
-<div id="sheet" class="sheet" hidden role="dialog" aria-modal="true" aria-label="Chi tiết"><div class="sheet-in"><div id="sheet-c"></div><div class="actions"><button class="btn" type="button" data-close>Đóng</button></div></div></div>
-<div id="lock" class="lock" hidden><form id="lock-f" class="lock-in" novalidate>
-  <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"/><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"/></svg>
+<div id="sheet" class="sheet" hidden="" role="dialog" aria-modal="true" aria-label="Chi tiết"><div class="sheet-in"><div id="sheet-c"></div><div class="actions"><button class="btn" type="button" data-close="">Đóng</button></div></div></div>
+<div id="lock" class="lock" hidden=""><form id="lock-f" class="lock-in" novalidate="">
+  <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"></rect><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"></path></svg>
   <h1>Sổ Thận Ghép</h1><p class="muted">Nhập mã PIN để mở sổ</p>
   <label class="sr" for="lock-in">Mã PIN</label><input id="lock-in" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password">
-  <p id="lock-err" class="err" hidden>Mã PIN chưa đúng. Thử lại.</p>
+  <p id="lock-err" class="err" hidden="">Mã PIN chưa đúng. Thử lại.</p>
   <button class="btn primary" type="submit" style="min-width:190px">Mở sổ</button>
   <details class="forgot"><summary>Quên mã PIN?</summary><p class="small" style="margin-bottom:8px">Dữ liệu chỉ nằm trên máy này nên không thể lấy lại mã. Cách duy nhất là xoá dữ liệu rồi khôi phục từ file sao lưu.</p><button class="btn danger" type="button" id="lock-wipe">Xoá dữ liệu trên máy này</button></details>
 </form></div>
-<div id="toast" role="status" aria-live="polite" hidden></div>
+<div id="pinsetup" class="lock"><form id="pinsetup-f" class="lock-in" novalidate="">
+  <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"></rect><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"></path></svg>
+  <h1>Tạo mã PIN</h1><p class="muted">Mã PIN dùng để mở sổ mỗi lần và mã hoá dữ liệu trên điện thoại này.</p>
+  <div class="pin2"><label class="sr" for="ps-1">Mã PIN mới</label><input id="ps-1" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="4–6 số">
+  <label class="sr" for="ps-2">Nhập lại mã PIN</label><input id="ps-2" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="nhập lại"></div>
+  <p id="ps-err" class="err" hidden=""></p>
+  <button class="btn primary" type="submit" style="min-width:190px">Tạo mã PIN</button>
+  <p class="small muted">Hãy ghi nhớ mã PIN. Quên mã PIN thì không ai lấy lại được dữ liệu, kể cả bệnh viện; khi đó phải xoá sổ và khôi phục từ file sao lưu. Nên chọn 6 số, không dùng ngày sinh.</p>
+</form></div>
+<div id="inapp" class="lock" hidden=""><div class="lock-in">
+  <svg width="48" height="48" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="9" fill="var(--accent)"></rect><path d="M20.5 7.5c-4.6 0-9 3.6-9 9.6 0 5.7 3.8 9.4 7.6 9.4 2.5 0 3.4-1.7 3.4-3.6 0-1.6-1.1-2.5-1.1-4.1 0-1.5 1.6-2.3 1.6-4.4 0-1.6-1-2.4-1-3.5 0-1.5 1.7-1.6 1.7-2.4 0-.6-1.1-1-3.2-1z" fill="var(--on-accent)"></path></svg>
+  <h1>Hãy mở sổ bằng Safari hoặc Chrome</h1>
+  <p>Bạn đang mở Sổ Thận Ghép bên trong <b class="inapp-name">Zalo</b>. Dữ liệu nhập ở đây có thể bị xoá khi ứng dụng này dọn bộ nhớ, và không cài được sổ lên màn hình chính.</p>
+  <div class="inapp-box"><b>Cách mở đúng:</b><ol>
+    <li>Dùng <b>camera điện thoại</b> quét mã QR của Khoa (không quét bằng Zalo), hoặc</li>
+    <li>Bấm nút <b>···</b> hoặc <b>⋮</b> ở góc trên bên phải → chọn <b>Mở bằng trình duyệt</b> (Safari/Chrome), hoặc</li>
+    <li>Bấm <b>Sao chép link</b> rồi dán vào Safari (iPhone) hoặc Chrome (Android).</li></ol></div>
+  <a class="btn primary" id="inapp-chrome" hidden="">Mở bằng Chrome</a>
+  <button class="btn" type="button" id="inapp-copy">Sao chép link</button>
+  <p class="inapp-link" id="inapp-url"></p>
+  <button class="btn sm" type="button" id="inapp-stay" style="border:0;background:none;color:var(--muted);text-decoration:underline"><span>Vẫn dùng tạm trong <span class="inapp-name">Zalo</span> (không khuyến khích)</span></button>
+</div></div>
+<div id="toast" role="status" aria-live="polite" hidden=""></div>
 <script>const BUILD = "pwa";</script><script>
 'use strict';
 /* ================= Tiện ích ================= */
@@ -912,8 +973,10 @@ function seed() {
 /* BUILD = 'pwa' trong bản phát hành (index.html), không khai báo trong bản mẫu trên claude.ai */
 const PWA = typeof BUILD !== 'undefined' && BUILD === 'pwa';
 const DEMO = !PWA || /[?&]demo=1/.test(location.search);
+/* Trình duyệt nhúng trong Zalo/Messenger…: dữ liệu có thể bị xoá, không cài được lên màn hình chính */
+const INAPP = (() => { const u = navigator.userAgent || ''; const m = [['Zalo', /zalo/i], ['Messenger/Facebook', /FBAN|FBAV|FB_IAB|FBIOS|Messenger/i], ['Instagram', /Instagram/i], ['Line', /\bLine\//i], ['WeChat', /MicroMessenger/i], ['TikTok', /musical_ly|BytedanceWebview|TikTok/i]].find(([, r]) => r.test(u)); return m ? m[0] : ''; })();
 const STORE = !PWA ? 'so-than-ghep-proto-v6' : DEMO ? 'so-than-ghep-demo' : 'so-than-ghep-data';
-const APP_VER = '1.1-thu-nghiem';
+const APP_VER = '1.2-thu-nghiem';
 function freshState() { if (DEMO) return seed(); const p = basePatient({ demo: false, name: '', txDate: TODAY, nextAppt: '' }); return { v: 6, cur: p.id, pin: '', patients: [p], fresh: true }; }
 /* Trình xem claude.ai chạy trang trong khung sandbox không cho gửi form: bấm nút Lưu hoặc Enter
    sẽ không phát sự kiện submit. Tự phát sự kiện submit (không gửi form thật) để mọi form vẫn chạy. */
@@ -933,6 +996,7 @@ async function encBytes(key, u8) { const iv = crypto.getRandomValues(new Uint8Ar
 async function decBytes(key, iv, ct) { return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct)); }
 async function sealState(key, salt, st) { const { iv, ct } = await encBytes(key, new TextEncoder().encode(JSON.stringify(st))); return JSON.stringify({ enc: 1, v: 6, kdf: 'PBKDF2-SHA256', it: KDF_IT, salt: u8b64(salt), iv: u8b64(iv), ct: u8b64(ct) }); }
 async function openState(env, pin) { const salt = b64u8(env.salt), key = await deriveKey(pin, salt, env.it); const pt = await decBytes(key, b64u8(env.iv), b64u8(env.ct)); return { key, salt, st: JSON.parse(new TextDecoder().decode(pt)) }; }
+const PIN_REQUIRED = PWA && !DEMO && CRYPTO_OK;
 const pinOn = () => !!(CR.key || CR.env || (S && S.pin));
 function normState(s) { s.patients.forEach(x => { normTbl(x); (x.meds || []).forEach(medTd); if (x.demo) { (x.meds || []).forEach(m => { if (m.name === 'Prednisolon') { m.name = 'Methylprednisolon (Medrol)'; m.dose = m.dose === '10 mg' ? '8 mg' : '4 mg'; } }); if (x.maint) x.maint = x.maint.replace('Prednisolon', 'Methylprednisolon'); } }); return s; }
 function load() { try { const r = localStorage.getItem(STORE); if (r) { const s = JSON.parse(r); if (s && s.enc === 1 && s.ct) { CR.env = s; return null; } if (s && s.v === 6 && s.patients && s.patients.length) return normState(s); } } catch (e) { } return freshState(); }
@@ -1153,7 +1217,7 @@ function renderHome() {
   const hist = E.slice(0, -1).reverse().flatMap(e => entryAlerts(p, e).filter(a => a.lv !== 'info')).slice(0, 12);
 
   el.innerHTML = `
-  ${installCard()}${PWA && !DEMO && !cur().name ? `<div class="card"><div class="alert info"><span class="ai" aria-hidden="true">${IC.info || ''}</span><div><p class="am">Chào mừng đến với sổ theo dõi sau ghép thận</p><p class="aa">Bước đầu tiên: nhập hồ sơ (ngày ghép, ngày xuất viện, creatinin lúc xuất viện, phác đồ thuốc, số điện thoại BS điều trị). Nên làm cùng BS hoặc điều dưỡng trước khi xuất viện.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-go-edit>Nhập hồ sơ</button></div></div></div></div>` : ''}
+  ${installCard()}${PWA && !DEMO && !cur().name ? `<div class="card"><div class="alert info"><span class="ai" aria-hidden="true">${IC.info || ''}</span><div><p class="am">Chào mừng đến với sổ theo dõi sau ghép thận</p><p class="aa">Bước đầu tiên: nhập hồ sơ (ngày ghép, ngày xuất viện, creatinin lúc xuất viện, phác đồ thuốc, số điện thoại BS điều trị). Nên làm cùng BS hoặc điều dưỡng trước khi xuất viện.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-go-edit>Nhập hồ sơ</button></div></div></div></div>` : ''}${PWA && !DEMO && INAPP ? `<div class="card"><div class="alert warn"><span class="ai" aria-hidden="true">${IC.warn}</span><div><p class="am">Đang dùng sổ bên trong ${esc(INAPP)}</p><p class="aa">Dữ liệu có thể bị xoá khi ${esc(INAPP)} dọn bộ nhớ. Hãy xuất file sao lưu, rồi mở sổ bằng Safari/Chrome (quét mã QR bằng camera) và nhập lại từ file sao lưu.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-export>Sao lưu ngay</button></div></div></div></div>` : ''}${PWA && !DEMO && cur().name && pfMissing(cur()).length ? `<div class="card"><div class="alert info"><span class="ai" aria-hidden="true">${IC.info || ''}</span><div><p class="am">Hồ sơ còn thiếu: ${esc(pfMissing(cur()).join(', '))}</p><p class="aa">Bổ sung để app cảnh báo đầy đủ${has(cur().crDis) ? '' : ' (creatinin lúc xuất viện giúp bật cảnh báo creatinin ngay từ lần nhập đầu)'}.</p><div class="actions" style="margin-top:8px"><button class="btn sm" type="button" data-go-edit>Bổ sung hồ sơ</button></div></div></div></div>` : ''}
   <div class="card hero">
     <div class="day-badge" aria-hidden="true"><b>${day >= 0 ? day : '–'}</b><span>ngày</span></div>
     <div style="min-width:0"><h1>${esc(p.name || 'Người bệnh mới')}</h1>
@@ -1254,6 +1318,16 @@ function drugFieldset(p, kind) {
     <div class="grid2">${numInput(am, a)}${once ? `<input type="hidden" id="${ids[2]}" value="">` : numInput(nf(ids[2]), b)}</div>
   </fieldset>`;
 }
+let edT = 0;
+function entryDraftLater() { clearTimeout(edT); edT = setTimeout(entryDraftNow, 600); }
+function entryDraftNow() {
+  const f = $('#f-entry'); if (!f || !S) return;
+  const vals = {}; let any = false;
+  $$('input, select, textarea', f).forEach(x => { if (!x.id || x.type === 'file' || x.readOnly) return; if (x.type === 'checkbox') { vals[x.id] = x.checked; if (x.checked) any = true; } else { vals[x.id] = x.value; if (x.value !== '' && !['e-date', 'e-kind', 'e-cru', 'e-gluu', 'e-glut'].includes(x.id) && !/u$/.test(x.id)) any = true; } });
+  const d = new Date();
+  if (any) S.draftEntry = { pid: cur().id, vals, at: `${pad2(d.getHours())}:${pad2(d.getMinutes())} ${fmtD(TODAY)}` }; else delete S.draftEntry;
+  save();
+}
 function renderEntry() {
   const p = cur(), el = $('#tab-entry');
   let res = '';
@@ -1316,7 +1390,17 @@ function renderEntry() {
   const f = $('#f-entry');
   const crU = () => { const v = parseFloat($('#e-cr').value); if (!isFinite(v)) return null; return $('#e-cru').value === 'mgdl' ? Math.round(v * 88.4) : Math.round(v); };
   const upd = () => { const c = crU(), d = $('#e-date').value || TODAY; const g = c ? egfr(c, p.sex, ageAt(p.dob, d)) : null; $('#e-egfr').value = g ? `${g} mL/ph/1,73 m²` : '—'; };
-  f.oninput = upd; f.onchange = upd;
+  /* Bản 1.2: phiếu nhập kết quả đang nhập dở được tự lưu nháp, mở lại vẫn còn */
+  const dr = S.draftEntry && S.draftEntry.pid === p.id ? S.draftEntry : null;
+  if (dr) {
+    Object.entries(dr.vals).forEach(([id, v]) => { const x = document.getElementById(id); if (!x || !f.contains(x)) return; if (x.type === 'checkbox') x.checked = !!v; else x.value = v; if (v !== '' && v !== false) { const dt = x.closest('details'); if (dt) dt.open = true; } });
+    const nt = document.createElement('div'); nt.className = 'alert info'; nt.style.marginBottom = '12px';
+    nt.innerHTML = `<span class="ai" aria-hidden="true">${IC.info || ''}</span><div><p class="am">Đã khôi phục phần đang nhập dở (lưu lúc ${esc(dr.at)})</p><p class="aa">Kiểm tra lại rồi bấm "Lưu kết quả". <button class="btn sm" type="button" data-draft-x style="margin-left:6px">Bỏ phần nhập dở</button></p></div>`;
+    f.prepend(nt); upd();
+  }
+  f.oninput = () => { upd(); entryDraftLater(); }; f.onchange = () => { upd(); entryDraftLater(); };
+  f.addEventListener('reset', () => { setTimeout(() => { delete S.draftEntry; save(); upd(); const n = $('[data-draft-x]', f); if (n) n.closest('.alert').remove(); }, 0); });
+  f.addEventListener('click', ev => { if (ev.target.closest('[data-draft-x]')) { delete S.draftEntry; save(); renderEntry(); } });
   el.onclick = ev => { const g = ev.target.closest('[data-go]'); if (g) { UI.saved = null; setTab(g.dataset.go); } };
   f.onsubmit = ev => {
     ev.preventDefault();
@@ -1335,6 +1419,7 @@ function renderEntry() {
     if (!bad && !hasData) { $('#e-form-err').textContent = 'Chưa có số liệu nào. Hãy nhập ít nhất một chỉ số, triệu chứng hoặc ghi chú.'; $('#e-form-err').hidden = false; return; }
     if (bad) { bad.focus(); return; }
     const before = { tac: lastDose(p, 'tac'), evr: lastDose(p, 'evr'), srl: lastDose(p, 'srl') };
+    clearTimeout(edT); delete S.draftEntry;
     p.entries.push(e); p.entries.sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
     let medUpd = false; const nx = $('#e-next').value;
     if (nx) { p.nextAppt = nx; p.nextNote = e.advice || ''; }
@@ -1785,7 +1870,7 @@ function renderProfile() {
   const fld = ([k, l, t, o]) => `<div class="field"><label for="pf-${k}">${l}</label>${t === 'select' ? `<select id="pf-${k}">${o.map(x => `<option value="${x[0]}"${String(x[0]) === String(p[k]) ? ' selected' : ''}>${x[1]}</option>`).join('')}</select>` : `<input id="pf-${k}" type="${t}" value="${esc(p[k] ?? '')}"${t === 'number' ? ' inputmode="decimal"' : ''}>`}</div>`;
   const edit = `<form id="f-pf" class="card form" novalidate><div class="card-h"><h2>Chỉnh sửa hồ sơ</h2></div><div class="grid2">${PF.filter(f => PF_CORE.includes(f[0])).map(fld).join('')}</div>
      <details class="add"><summary>Thông tin ghép chi tiết (không bắt buộc)</summary><div class="grid2">${PF.filter(f => !PF_CORE.includes(f[0])).map(fld).join('')}</div></details>
-     <p class="small" id="pf-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Lưu hồ sơ</button><button class="btn" type="button" data-cancel>Huỷ</button></div></form>`;
+     <p class="small" id="pf-err" style="color:var(--crit);font-weight:600" hidden></p><div class="actions"><button class="btn primary" type="submit">Lưu hồ sơ</button><button class="btn" type="button" data-cancel>Đóng</button></div><p class="auto-note" id="pf-auto">Thông tin được tự lưu ngay khi nhập.</p></form>`;
   const reg = p.regimen || 'tac_mpa';
   const SUB = { tac_mpa: 'Tac + MPA + methylprednisolon', tac_evr: 'khi phối hợp mTORi', tac_srl: 'khi phối hợp mTORi', evr: '+ CNI giảm liều', srl: '+ CNI giảm liều', srl_free: 'không CNI' };
   const specs = [['tac', 'tt'], ['evr', 'te'], ['srl', 'ts']].map(([k, pre]) => ({ k, pre, key: tblKey(reg, k) })).filter(x => x.key);
@@ -1805,7 +1890,7 @@ function renderProfile() {
     <p class="small" id="pin-err" style="color:var(--crit);font-weight:600;margin-top:6px" hidden>Mã PIN gồm 4 đến 6 chữ số.</p>
     <p class="small" style="margin-top:6px">${S.pin ? '<b>Khoá PIN đang bật, dữ liệu trên máy đã được mã hoá.</b> Sổ tự khoá khi mở lại và khi rời app hơn 2 phút.' : 'Khoá PIN đang tắt. Đặt mã PIN để khoá sổ và mã hoá toàn bộ dữ liệu trên máy (hồ sơ, kết quả, thuốc, file đính kèm).'} Nên chọn PIN 6 số và không dùng ngày sinh. Quên PIN: không ai lấy lại được dữ liệu, kể cả bệnh viện; chọn "Quên mã PIN" ở màn hình khoá để xoá dữ liệu, rồi khôi phục từ file sao lưu.</p>
     <p class="small" style="margin-top:6px">File sao lưu <b>không mã hoá</b> và không chứa mã PIN: chỉ lưu ở nơi riêng của bạn (Zalo "Cloud của tôi", Google Drive cá nhân), không gửi vào nhóm chat.</p>
-    <div class="actions" style="margin-top:12px">${S.pin ? '<button class="btn danger" type="button" data-pinoff>Tắt khoá PIN</button><button class="btn" type="button" data-lock>Khoá ngay</button>' : ''}<button class="btn" type="button" data-export>Xuất file sao lưu</button><label class="btn" for="imp-file">Nhập từ file sao lưu</label><input id="imp-file" type="file" accept=".json,application/json" hidden></div>
+    <div class="actions" style="margin-top:12px">${S.pin ? (PIN_REQUIRED ? '' : '<button class="btn danger" type="button" data-pinoff>Tắt khoá PIN</button>') + '<button class="btn" type="button" data-lock>Khoá ngay</button>' : ''}<button class="btn" type="button" data-export>Xuất file sao lưu</button><label class="btn" for="imp-file">Nhập từ file sao lưu</label><input id="imp-file" type="file" accept=".json,application/json" hidden></div>
     ${UI.pendingImport ? `<div class="alert warn" style="margin-top:12px"><span class="ai" aria-hidden="true">${IC.warn}</span><div><p class="am">File sao lưu hợp lệ: ${UI.pendingImport.patients.length} hồ sơ</p><p class="aa">Dữ liệu hiện tại trên máy sẽ được thay bằng dữ liệu trong file.</p><div class="actions" style="margin-top:8px"><button class="btn primary sm" type="button" data-import-ok>Thay bằng dữ liệu từ file</button><button class="btn sm" type="button" data-import-cancel>Huỷ</button></div></div></div>` : ''}
     <p class="muted small" style="margin-top:10px">Lần sao lưu gần nhất: <b>${S.lastBackup ? fmtD(S.lastBackup) : 'chưa có'}</b>. App nhắc sao lưu sau mỗi lần tái khám (tháng 1: mỗi tuần, tháng 2: mỗi 2 tuần, từ tháng 3: mỗi tháng). Gửi file vào Zalo "Cloud của tôi" hoặc Google Drive; khi đổi điện thoại, chọn "Nhập từ file sao lưu".</p>
     <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><h3 style="margin:0 0 6px">Xoá toàn bộ dữ liệu trên máy này</h3><p class="small" style="margin-bottom:8px">Xoá hồ sơ, kết quả, thuốc, lịch, file đính kèm và mã PIN trên điện thoại này. Không thể hoàn tác; nếu còn muốn giữ, hãy xuất file sao lưu trước.</p><button class="btn danger" type="button" data-wipe>Xoá toàn bộ dữ liệu</button></div></div>`;
@@ -1845,13 +1930,13 @@ function renderProfile() {
   el.onclick = ev => {
     const t = ev.target;
     if (t.closest('[data-edit]')) { UI.editProfile = true; renderProfile(); return; }
-    if (t.closest('[data-cancel]')) { UI.editProfile = false; renderProfile(); return; }
+    if (t.closest('[data-cancel]')) { clearTimeout(pfT); pfAuto(); UI.editProfile = false; renderProfile(); return; }
     if (t.closest('[data-new]')) { newPatient(); return; }
     if (t.closest('[data-import-ok]')) { const o = UI.pendingImport; UI.pendingImport = null; const ofs = o.files || []; delete o.files; ofs.forEach(f => { try { fput({ id: f.id, name: f.name, type: f.type, size: f.size, date: f.date, blob: blobOf(f.data, f.type) }); } catch (e) { } }); S = Object.assign(o, { pin: S.pin, v: 6 }); S.patients.forEach(x => { normTbl(x); if (!x.regimen) x.regimen = x.useEvr === 'yes' ? 'tac_evr' : 'tac_mpa'; if (x.regimenFrom == null) x.regimenFrom = ''; if (!x.dm) x.dm = 'no'; if (!REGIMENS[x.regimen]) x.regimen = 'tac_mpa'; if (!has(x.crDis) && has(x.baseCr)) x.crDis = x.baseCr; }); if (!S.patients.some(x => x.id === S.cur)) S.cur = S.patients[0].id; save(); renderSelect(); toast('Đã khôi phục từ file sao lưu'); setTab('home'); return; }
     if (t.closest('[data-import-cancel]')) { UI.pendingImport = null; renderProfile(); return; }
     if (t.closest('[data-lock]')) { lockNow(); return; }
     const po = t.closest('[data-pinoff]'); if (po) { if (!armConfirm(po, 'Xác nhận tắt PIN')) return; po.disabled = true; disableEnc().then(() => { toast('Đã tắt khoá PIN, dữ liệu không còn mã hoá'); renderProfile(); }); return; }
-    const wp = t.closest('[data-wipe]'); if (wp) { if (!armConfirm(wp, 'Bấm lần nữa để xoá vĩnh viễn')) return; wp.disabled = true; wipeAll().then(() => { renderSelect(); toast(DEMO ? 'Đã xoá; dữ liệu mẫu được tạo lại' : 'Đã xoá toàn bộ dữ liệu trên máy này'); setTab('home'); }); return; }
+    const wp = t.closest('[data-wipe]'); if (wp) { if (!armConfirm(wp, 'Bấm lần nữa để xoá vĩnh viễn')) return; wp.disabled = true; wipeAll().then(() => { renderSelect(); toast(DEMO ? 'Đã xoá; dữ liệu mẫu được tạo lại' : 'Đã xoá toàn bộ dữ liệu trên máy này'); setTab('home'); if (needPin()) showPinSetup(); }); return; }
     const rs = t.closest('[data-reset]'); if (rs) { if (!armConfirm(rs, 'Bấm lần nữa để khôi phục')) return; S = seed(); save(); UI.editProfile = false; renderSelect(); toast('Đã khôi phục dữ liệu mẫu'); setTab('home'); return; }
     const dp = t.closest('[data-delp]'); if (dp) { if (!armConfirm(dp, 'Xác nhận xoá người bệnh')) return; S.patients = S.patients.filter(x => x.id !== p.id); S.cur = S.patients[0].id; save(); renderSelect(); toast('Đã xoá người bệnh'); setTab('home'); return; }
     const db = t.closest('[data-delb]'); if (db) { if (!armConfirm(db, 'Xác nhận xoá')) return; const ob = p.biopsies.find(x => x.id === db.dataset.delb); if (ob && ob.file) fdel(ob.file.id); p.biopsies = p.biopsies.filter(x => x.id !== db.dataset.delb); save(); renderProfile(); return; }
@@ -1880,13 +1965,9 @@ function renderProfile() {
       renderProfile(); return;
     }
     if (f.id === 'f-pf') {
-      const n = {}; PF.forEach(([k, , t]) => { let v = $('#pf-' + k).value; if (t === 'number') v = v === '' ? '' : +v; if (k.startsWith('hla')) v = +v; n[k] = v; });
-      const er = $('#pf-err');
-      if (!n.name || !n.dob || !n.txDate) { er.textContent = 'Cần có họ tên, ngày sinh và ngày ghép.'; er.hidden = false; return; }
-      if (!has(n.crDis)) { er.textContent = 'Cần nhập creatinin lúc xuất viện để app tính cảnh báo creatinin.'; er.hidden = false; return; }
-      if ([n.crDis, n.cr1y, n.crAdj].some(v => has(v) && !(v >= 20 && v <= 1500))) { er.textContent = 'Creatinin cần trong khoảng 20–1500 µmol/L.'; er.hidden = false; return; }
-      if (has(n.hba1cTgt) && !(n.hba1cTgt >= 5 && n.hba1cTgt <= 10)) { er.textContent = 'Mục tiêu HbA1c cần trong khoảng 5–10%.'; er.hidden = false; return; }
-      Object.assign(p, n); delete S.fresh; save(); UI.editProfile = false; renderSelect(); toast('Đã lưu hồ sơ'); renderProfile();
+      const r = applyPF(p);
+      if (r.bad.length) { const w = $('#pf-' + r.bad[0]); w.scrollIntoView({ block: 'center' }); w.focus({ preventScroll: true }); const er = $('#pf-err'); er.textContent = 'Ô tô đỏ chưa hợp lệ, chưa được lưu: ' + r.msgs.join(' ') + ' Các ô khác đã được lưu.'; er.hidden = false; return; }
+      UI.editProfile = false; renderSelect(); const miss = pfMissing(p); toast(miss.length ? 'Đã lưu hồ sơ. Còn thiếu: ' + miss.join(', ') + '.' : 'Đã lưu hồ sơ'); renderProfile();
     } else if (f.id === 'f-bx') {
       const d = $('#b-date').value; if (!d) { $('#b-date').focus(); return; }
       const fl = $('#b-file').files[0], fe = $('#w-b-file .err'); let fm = null;
@@ -1902,6 +1983,31 @@ function renderProfile() {
       p.events.push({ id: uid(), date: d, end: $('#v-end').value, type: $('#v-type').value, hosp: $('#v-hosp').value, detail: $('#v-detail').value.trim() }); save(); toast('Đã lưu biến cố'); renderProfile();
     }
   };
+}
+/* ===== Bản 1.2: hồ sơ nhập tới đâu lưu tới đó ===== */
+const PF_RANGE = { crDis: [20, 1500, 'Creatinin cần trong khoảng 20–1500 µmol/L.'], cr1y: [20, 1500, 'Creatinin cần trong khoảng 20–1500 µmol/L.'], crAdj: [20, 1500, 'Creatinin cần trong khoảng 20–1500 µmol/L.'], hba1cTgt: [5, 10, 'Mục tiêu HbA1c cần trong khoảng 5–10%.'], pra: [0, 100, 'PRA cần trong khoảng 0–100%.'] };
+function applyPF(p) {
+  const n = {}, bad = [], msgs = [];
+  PF.forEach(([k, , t]) => {
+    const el = $('#pf-' + k); if (!el) return; const w = el.closest('.field'); if (w) w.classList.remove('bad');
+    let v = el.value; if (t === 'number') v = v === '' ? '' : +v; if (k.startsWith('hla')) v = +v;
+    const rg = PF_RANGE[k];
+    if (rg && has(v) && !(v >= rg[0] && v <= rg[1])) { bad.push(k); if (!msgs.includes(rg[2])) msgs.push(rg[2]); if (w) w.classList.add('bad'); return; }
+    if (t === 'number' && v !== '' && !isFinite(v)) { bad.push(k); if (w) w.classList.add('bad'); return; }
+    n[k] = v;
+  });
+  if (!n.txDate) delete n.txDate;
+  Object.assign(p, n); delete S.fresh; save();
+  return { bad, msgs };
+}
+const PF_KEY = [['name', 'họ tên'], ['dob', 'ngày sinh'], ['crDis', 'creatinin lúc xuất viện'], ['drPhone', 'số điện thoại BS điều trị']];
+function pfMissing(p) { return PF_KEY.filter(([k]) => !has(p[k]) || p[k] === '').map(([, l]) => l); }
+let pfT = 0;
+document.addEventListener('input', ev => { if (!ev.target.closest || !ev.target.closest('#f-pf')) return; clearTimeout(pfT); pfT = setTimeout(pfAuto, 500); });
+document.addEventListener('change', ev => { if (!ev.target.closest || !ev.target.closest('#f-pf')) return; clearTimeout(pfT); pfAuto(); });
+function pfAuto() {
+  if (!$('#f-pf') || !S) return; const r = applyPF(cur());
+  const a = $('#pf-auto'); if (a) { const d = new Date(); a.textContent = r.bad.length ? 'Đã tự lưu, trừ ô tô đỏ: ' + r.msgs.join(' ') : `Đã tự lưu lúc ${pad2(d.getHours())}:${pad2(d.getMinutes())}.`; }
 }
 function newPatient() {
   const p = basePatient({ demo: false, name: '', txDate: TODAY, nextAppt: '' });
@@ -1933,8 +2039,12 @@ $('#lock-f').addEventListener('submit', async ev => {
   if (!ok) { CR.fails++; if (CR.fails >= 5) CR.until = Date.now() + Math.min(900, 30 * 2 ** (CR.fails - 5)) * 1000; lockErr(CR.fails >= 5 ? `Mã PIN chưa đúng. Đã sai ${CR.fails} lần, chờ ${Math.round((CR.until - Date.now()) / 1000)} giây rồi thử lại.` : 'Mã PIN chưa đúng. Thử lại.'); return; }
   CR.fails = 0; CR.until = 0; $('#lock').hidden = true; renderSelect(); setTab(UI.tab || 'home');
 });
-$('#lock-wipe').addEventListener('click', ev => { if (!armConfirm(ev.currentTarget, 'Bấm lần nữa để xoá')) return; wipeAll().then(() => { $('#lock').hidden = true; renderSelect(); setTab('home'); toast('Đã xoá dữ liệu trên máy này'); }); });
+$('#lock-wipe').addEventListener('click', ev => { if (!armConfirm(ev.currentTarget, 'Bấm lần nữa để xoá')) return; wipeAll().then(() => { $('#lock').hidden = true; renderSelect(); setTab('home'); toast('Đã xoá dữ liệu trên máy này'); if (needPin()) showPinSetup(); }); });
 let hiddenAt = 0;
+/* Bản 1.2: rời app (chuyển ứng dụng, khoá màn hình) thì lưu ngay phần đang nhập */
+function flushDrafts() { try { if ($('#f-pf')) { clearTimeout(pfT); pfAuto(); } if ($('#f-entry')) { clearTimeout(edT); entryDraftNow(); } } catch (e) { } }
+document.addEventListener('visibilitychange', () => { if (document.hidden) flushDrafts(); });
+window.addEventListener('pagehide', flushDrafts);
 document.addEventListener('visibilitychange', () => { if (document.hidden) hiddenAt = Date.now(); else if (pinOn() && $('#lock').hidden && hiddenAt && Date.now() - hiddenAt > 120000) lockNow(); });
 document.addEventListener('click', ev => {
   if (ev.target.closest('[data-export]')) { backupNow(); return; }
@@ -1958,5 +2068,39 @@ if (PWA) {
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => { });
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
 }
-if (CR.env) showLock(); else { renderSelect(); setTab('home'); if (S.pin) showLock(); }
-</script></body></html>
+/* ===== Bản 1.2: bắt buộc tạo mã PIN ở lần dùng đầu (bản phát hành, dữ liệu thật) ===== */
+function needPin() { return PIN_REQUIRED && !CR.env && !CR.key && !(S && S.pin); }
+function showPinSetup() { const o = $('#pinsetup'); o.hidden = false; $('#ps-1').value = ''; $('#ps-2').value = ''; $('#ps-err').hidden = true; setTimeout(() => $('#ps-1').focus(), 60); }
+$('#pinsetup-f').addEventListener('submit', async ev => {
+  ev.preventDefault(); const a = $('#ps-1').value, b = $('#ps-2').value, er = $('#ps-err'), btn = $('#pinsetup-f button[type="submit"]');
+  const bad = m => { er.textContent = m; er.hidden = false; };
+  if (!/^\d{4,6}$/.test(a)) return bad('Mã PIN gồm 4 đến 6 chữ số.');
+  if (a !== b) { $('#ps-2').value = ''; $('#ps-2').focus(); return bad('Hai lần nhập chưa giống nhau. Nhập lại mã PIN.'); }
+  btn.disabled = true; const lbl = btn.textContent; btn.textContent = 'Đang tạo…';
+  try { await enableEnc(a); } catch (e) { btn.disabled = false; btn.textContent = lbl; return bad('Không tạo được mã PIN trên trình duyệt này. Hãy mở sổ bằng Safari hoặc Chrome bản mới.'); }
+  btn.disabled = false; btn.textContent = lbl; $('#pinsetup').hidden = true; toast('Đã tạo mã PIN. Lần sau mở sổ, nhập mã PIN này.');
+  if (!cur().name) { UI.editProfile = true; setTab('profile'); } else render();
+});
+function showInapp() {
+  const o = $('#inapp'); $$('.inapp-name', o).forEach(x => { x.textContent = INAPP; });
+  $('#inapp-url').textContent = location.href.replace(/[?&]$/, '');
+  const ch = $('#inapp-chrome');
+  if (/android/i.test(navigator.userAgent)) { ch.href = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;end'; ch.hidden = false; }
+  o.hidden = false;
+}
+$('#inapp-copy').addEventListener('click', () => {
+  const u = location.href, done = () => toast('Đã sao chép link. Mở Safari hoặc Chrome, dán vào ô địa chỉ.');
+  const fb = () => { const t = document.createElement('textarea'); t.value = u; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (e) { toast('Hãy giữ ngón tay trên link bên dưới để sao chép.'); } t.remove(); };
+  try { navigator.clipboard.writeText(u).then(done, fb); } catch (e) { fb(); }
+});
+$('#inapp-stay').addEventListener('click', ev => { if (!armConfirm(ev.currentTarget, 'Bấm lần nữa nếu vẫn dùng tạm')) return; try { sessionStorage.setItem('stg-inapp-ok', '1'); } catch (e) { } $('#inapp').hidden = true; startApp(); });
+function startApp() {
+  if (CR.env) { showLock(); return; }
+  renderSelect(); setTab('home');
+  if (S.pin) { showLock(); return; }
+  if (needPin()) showPinSetup();
+}
+function inappOk() { try { return sessionStorage.getItem('stg-inapp-ok') === '1'; } catch (e) { return false; } }
+if (PWA && !DEMO && INAPP && !inappOk()) showInapp(); else startApp();
+</script>
+</body></html>
